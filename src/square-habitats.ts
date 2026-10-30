@@ -196,3 +196,11 @@ export function drawSquareHabitat(
   ctx.drawImage(tileFor(type), x, y, Math.round(size), Math.round(size));
   ctx.restore();
 }
+
+/** Flat cached biome texture for temporary route patches; no raised scenery or new game terrain. */
+export function drawHabitatTrailPatch(ctx: CanvasRenderingContext2D, type: PieceSymbol, center: Point, tile: number, opacity: number, scale: number): void {
+  const size = tile * scale;
+  ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = opacity;
+  ctx.drawImage(tileFor(type), Math.round(center.x - size / 2), Math.round(center.y - size / 2), Math.round(size), Math.round(size));
+  ctx.restore();
+}

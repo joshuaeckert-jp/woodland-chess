@@ -2,8 +2,9 @@ import type { Color, PieceSymbol, Square } from "chess.js";
 import { OBSTACLE_SPRITE_LAYOUT, obstacleGeometry, towerPerchElevation, type BoardObstacle } from "./checkmate/obstacle-art";
 import { BOARD_AMBIENCE_FRAME_MS, canRunBoardAmbience, idlePoseForPiece, rimMoteAt } from "./board-ambience";
 import { drawCourtyardTiles, loadCourtyardArt } from "./courtyard-tiles";
-import { drawSquareHabitat, loadSquareHabitatArt } from "./square-habitats";
+import { drawSquareHabitat, drawHabitatTrailPatch, loadSquareHabitatArt } from "./square-habitats";
 import { createAlignedStructureSprite } from "./checkmate/structure-ground";
+import { terrainTrailSamples, terrainTrailOpacity, TERRAIN_TRAIL_RECEDE_MS } from "./terrain-trail";
 
 export type { BoardObstacle } from "./checkmate/obstacle-art";
 
@@ -31,6 +32,7 @@ export interface TacticalEncounterEffect {
 }
 
 type Point = { x: number; y: number };
+type TerrainTrail = { type: PieceSymbol; from: Square; to: Square; phase: 'preview' | 'follow' | 'recede'; progress: number };
 type Transient = {
   piece: RenderPiece;
   from: Point;
@@ -223,6 +225,10 @@ export class BoardRenderer {
   private celebration: { winner: "w" | "b" | "draw"; progress: number } | null = null;
   private settleCelebration: (() => void) | null = null;
   private transient: Transient[] = [];
+  private trails: TerrainTrail[] = [];
+  private readonly trailLayer = document.createElement('canvas');
+  private trailFadeRaf = 0;
+  private trailFade = 1;
   private pendingAfter?: RenderPiece[];
   private habitatDrag: { piece: RenderPiece; point: Point; target?: Square } | null = null;
   private committedHabitat: { from: Square; to: Square } | null = null;
@@ -258,6 +264,7 @@ export class BoardRenderer {
   }
 
   setPosition(pieces: RenderPiece[]): void {
+    this.clearTrailFade(); this.trails = [];
     this.pieces = pieces.map((piece) => ({ ...piece }));
     this.transient = [];
     this.draw();
@@ -277,6 +284,10 @@ export class BoardRenderer {
    */
   previewHabitatDrag(piece: RenderPiece | null, point?: Point, target?: Square | null): void {
     this.habitatDrag = piece && point ? { piece: { ...piece }, point: { ...point }, ...(target ? { target } : {}) } : null;
+    if (piece && target && !this.reducedMotion) {
+      this.clearTrailFade();
+      this.trails = [{ type: piece.type, from: piece.square, to: target, phase: 'preview', progress: 0 }];
+    } else if (!this.settleAnimation) this.fadePreviewTrail();
     if (this.habitatDrag) this.stopAmbience(); else this.startAmbience();
     this.draw();
   }
@@ -290,8 +301,8 @@ export class BoardRenderer {
     const preview = this.habitatDrag;
     this.habitatDrag = null;
     this.committedHabitat = preview?.target ? { from: preview.piece.square, to: preview.target } : null;
-    this.draw();
-    this.startAmbience();
+    // Keep the preview painted until the matching action prepares its following trail.
+    if (!preview?.target) { this.fadePreviewTrail(); this.draw(); this.startAmbience(); }
   }
 
   setSelection(selected: Square | null, legal: Square[], last?: [Square, Square], check?: Square): void {
@@ -314,7 +325,7 @@ export class BoardRenderer {
 
   setReducedMotion(value: boolean): void {
     this.reducedMotion = value;
-    if (value && this.transient.length) this.cancel();
+    if (value && (this.settleAnimation || this.trails.length)) this.cancel();
     if (value) this.stopAmbience(); else this.startAmbience();
     this.draw();
   }
@@ -359,7 +370,7 @@ export class BoardRenderer {
   }
 
   animate(before: RenderPiece[], after: RenderPiece[], effect: MoveEffect): Promise<void> {
-    this.cancel();
+    this.cancel(undefined, false);
     if (this.reducedMotion || this.destroyed) {
       this.setPosition(after);
       return Promise.resolve();
@@ -373,6 +384,8 @@ export class BoardRenderer {
     const from = this.squarePoint(effect.from);
     const to = this.squarePoint(effect.to);
     const rook = effect.rook && before.find((piece) => piece.square === effect.rook!.from);
+    this.trails = [{ type: moving.type, from: effect.from, to: effect.to, phase: 'follow', progress: 0 }];
+    if (rook && effect.rook) this.trails.push({ type: rook.type, from: effect.rook.from, to: effect.rook.to, phase: 'follow', progress: 0 });
     this.pieces = before.filter((piece) => piece.square !== moving.square && piece.square !== effect.capturedSquare && piece.square !== rook?.square);
     this.pendingAfter = after.map((piece) => ({ ...piece }));
     const travelers: Transient[] = [{ piece: moving, from, to, progress: habitatPlaced ? 1 : 0, animalProgress: 0, frame: this.restFrame(moving), plan, mirror: plan.mirror, role: "mover", perchFrom: this.perchAt(effect.from), perchTo: this.perchAt(effect.to), ...(habitatPlaced ? { habitatCenter: to } : {}) }];
@@ -406,6 +419,7 @@ export class BoardRenderer {
           }
           item.progress = ground;
           item.animalProgress = animal;
+          item.habitatOpacity = .55 + animal * .45;
           item.frame = poseFor(t, item.plan, item.piece.type, this.framesPerTeam(), restFrameForPiece(item.piece.color, this.flipped) === 16);
           item.animalCenter = undefined;
           item.habitatCenter = undefined;
@@ -446,14 +460,10 @@ export class BoardRenderer {
         else {
           this.transient = [];
           this.pieces = after.map((piece) => ({ ...piece }));
-          this.pendingAfter = undefined;
           // A promotion becomes its new species only after the arrival settles.
           const promoted = this.pieces.find((piece) => piece.square === effect.to && piece.color === effect.color);
           if (promoted) promoted.type = finalType;
-          this.draw();
-          this.settleAnimation = null;
-          this.startAmbience();
-          resolve();
+          this.recedeTrails(token, resolve);
         }
       };
       this.raf = requestAnimationFrame(tick);
@@ -524,7 +534,7 @@ export class BoardRenderer {
 
   /** Tactical-only entry point. Classic callers keep using animate unchanged. */
   animateTacticalEncounter(before: RenderPiece[], after: RenderPiece[], effect: TacticalEncounterEffect): Promise<void> {
-    this.cancel()
+    this.cancel(undefined, false)
     if (this.reducedMotion || this.destroyed) { this.setPosition(after); return Promise.resolve() }
     if (effect.lethal && !effect.ranged) return this.animate(before, after, { from: effect.from, to: effect.target, piece: effect.piece, color: effect.color, capturedSquare: effect.target })
     const attacker = before.find(piece => piece.square === effect.from) ?? { square: effect.from, type: effect.piece, color: effect.color }
@@ -532,6 +542,7 @@ export class BoardRenderer {
     const from = this.squarePoint(effect.from), landing = this.squarePoint(effect.ranged ? effect.from : effect.landing), target = this.squarePoint(effect.target)
     const token = ++this.animationId
     this.pendingAfter = after.map(piece => ({ ...piece }))
+    this.trails = !effect.ranged && effect.from !== effect.landing ? [{ type: effect.piece, from: effect.from, to: effect.landing, phase: 'follow', progress: 0 }] : [];
     this.pieces = before.filter(piece => piece.square !== attacker.square && piece.square !== defender.square)
     const actor: Transient = { piece: attacker, from, to: landing, progress: 0, animalProgress: 0, frame: this.restFrame(attacker), plan: createMovePlan(effect.from, effect.landing, false, this.flipped), role: 'mover', perchFrom: this.perchAt(effect.from), perchTo: this.perchAt(effect.ranged ? effect.from : effect.landing) }
     const victim: Transient = { piece: defender, from: target, to: target, progress: 0, animalProgress: 0, frame: this.restFrame(defender), plan: createMovePlan(effect.target, effect.target, false, this.flipped), role: 'victim', opacity: 1, scale: 1, perchFrom: this.perchAt(effect.target), perchTo: this.perchAt(effect.target) }
@@ -545,6 +556,7 @@ export class BoardRenderer {
         const strike = Math.max(0, Math.min(1, (t - .56) / .18))
         actor.progress = effect.ranged ? 0 : easeInOut(Math.min(1, t / .28))
         actor.animalProgress = effect.ranged ? 0 : easeInOut(Math.max(0, Math.min(1, (t - .24) / .34)))
+        actor.habitatOpacity = this.trails.length ? .55 + actor.animalProgress * .45 : 1
         actor.frame = t < .24 ? (this.restFrame(attacker) === 16 ? 17 : 1) : t < .52 ? poseFor(.40 + (t-.24)/.28*.35, actor.plan, attacker.type, this.framesPerTeam(), this.restFrame(attacker) === 16) : t < .74 ? 8 : t < .86 ? 9 : (this.restFrame(attacker) === 16 ? 18 : 10)
         victim.frame = t < .56 ? this.restFrame(defender) : 9
         victim.animalCenter = { x: target.x + Math.sign(target.x - from.x) * Math.sin(strike*Math.PI) * this.scene().tile * .08, y: target.y + Math.sign(target.y - from.y) * Math.sin(strike*Math.PI) * this.scene().tile * .08 }
@@ -555,24 +567,64 @@ export class BoardRenderer {
         this.draw()
         if (effect.ranged && t >= .58) this.drawTacticalProjectile(attacker, effect.target, Math.min(1, (t - .58) / .22))
         if (t < 1) this.raf = requestAnimationFrame(tick)
-        else { this.transient = []; this.pieces = after.map(piece => ({ ...piece })); this.pendingAfter = undefined; this.settleAnimation = null; this.draw(); this.startAmbience(); resolve() }
+        else { this.transient = []; this.pieces = after.map(piece => ({ ...piece })); this.recedeTrails(token, resolve) }
       }
       this.raf = requestAnimationFrame(tick)
     })
   }
 
-  cancel(after?: RenderPiece[]): void {
+  private clearTrailFade(): void {
+    if (this.trailFadeRaf) cancelAnimationFrame(this.trailFadeRaf);
+    this.trailFadeRaf = 0; this.trailFade = 1;
+  }
+
+  private fadePreviewTrail(): void {
+    if (this.reducedMotion) { this.clearTrailFade(); this.trails = []; return; }
+    if (!this.trails.length || this.trailFadeRaf) return;
+    const started = performance.now();
+    const tick = (now: number) => {
+      this.trailFade = Math.max(0, 1 - (now - started) / 160);
+      if (!this.trailFade) { this.trails = []; this.trailFadeRaf = 0; }
+      this.draw();
+      if (this.trailFade) this.trailFadeRaf = requestAnimationFrame(tick);
+      else { this.trailFade = 1; this.startAmbience(); }
+    };
+    this.trailFadeRaf = requestAnimationFrame(tick);
+  }
+
+  private recedeTrails(token: number, resolve: () => void): void {
+    const finish = () => {
+      this.trails = []; this.raf = 0; this.pendingAfter = undefined; this.settleAnimation = null;
+      this.draw(); this.startAmbience(); resolve();
+    };
+    if (!this.trails.length || this.reducedMotion) { finish(); return; }
+    for (const trail of this.trails) { trail.phase = 'recede'; trail.progress = 0; }
+    const started = performance.now();
+    const tick = (now: number) => {
+      if (token !== this.animationId || this.destroyed) return;
+      const progress = Math.min(1, (now - started) / TERRAIN_TRAIL_RECEDE_MS);
+      for (const trail of this.trails) trail.progress = progress;
+      if (progress === 1) finish();
+      else { this.draw(); this.raf = requestAnimationFrame(tick); }
+    };
+    this.draw(); this.raf = requestAnimationFrame(tick);
+  }
+
+  cancel(after?: RenderPiece[], redraw = true): void {
+    // Startup may redraw obstacle state before animate prepares its travelers.
+    // Retain only the committed drag preview through that synchronous handoff.
+    const preview = !redraw && this.trails.every(trail => trail.phase === 'preview') ? this.trails : [];
     this.cancelCelebration();
     ++this.animationId;
     if (this.raf) cancelAnimationFrame(this.raf);
     this.raf = 0;
     this.transient = [];
+    this.clearTrailFade(); this.trails = preview;
     const settled = after ?? this.pendingAfter;
     if (settled) this.pieces = settled.map((piece) => ({ ...piece }));
     this.pendingAfter = undefined;
     this.habitatDrag = null;
-    this.draw();
-    this.startAmbience();
+    if (redraw) { this.draw(); this.startAmbience(); }
     const resolve = this.settleAnimation;
     this.settleAnimation = null;
     resolve?.();
@@ -588,7 +640,7 @@ export class BoardRenderer {
   }
 
   private readonly onVisibility = () => {
-    if (document.hidden && this.transient.length) this.cancel();
+    if (document.hidden && (this.settleAnimation || this.trails.length || this.habitatDrag)) this.cancel();
     if (document.hidden) this.cancelCelebration();
     if (document.hidden) this.stopAmbience(); else this.startAmbience();
   };
@@ -598,7 +650,7 @@ export class BoardRenderer {
       reducedMotion: this.reducedMotion,
       documentHidden: document.hidden,
       canvasVisible: this.canvasVisible,
-      actionActive: this.transient.length > 0 || (document.body.classList.contains("checkmate-mode") && document.body.dataset.gameBusy === "true"),
+      actionActive: this.transient.length > 0 || this.trails.length > 0 || (document.body.classList.contains("checkmate-mode") && document.body.dataset.gameBusy === "true"),
       dragActive: Boolean(this.habitatDrag),
       celebrationActive: Boolean(this.celebration),
       settingEnabled: !document.body.classList.contains("checkmate-mode") || document.body.dataset.ambient !== "off",
@@ -629,7 +681,7 @@ export class BoardRenderer {
 
   private resize(): void {
     // Stored pixel positions become invalid after a resize; settle atomically.
-    if (this.transient.length) this.cancel();
+    if (this.settleAnimation || this.trails.length || this.habitatDrag) this.cancel();
     if (this.habitatDrag) this.previewHabitatDrag(null);
     if (this.celebration) this.cancelCelebration();
     const rect = this.canvas.getBoundingClientRect();
@@ -668,6 +720,48 @@ export class BoardRenderer {
     return projectSquarePolygon(square, this.flipped).map((point) => ({ x: s.x + point.x * s.size, y: s.y + point.y * s.size }));
   }
 
+  private drawMovementTrails(s: ReturnType<BoardRenderer['scene']>): void {
+    const visible = this.reducedMotion ? [] : this.trails;
+    this.canvas.dataset.terrainTrailPhase = visible[0]?.phase ?? 'none';
+    this.canvas.dataset.terrainTrailCount = String(visible.length);
+    if (!visible.length) return;
+    const layer = this.trailLayer;
+    if (layer.width !== Math.ceil(this.cssWidth) || layer.height !== Math.ceil(this.cssHeight)) {
+      layer.width = Math.ceil(this.cssWidth); layer.height = Math.ceil(this.cssHeight);
+    }
+    const paint = layer.getContext('2d')!;
+    paint.clearRect(0, 0, layer.width, layer.height);
+    const project = (x: number, y: number): Point => {
+      const column = this.flipped ? 7 - x : x, row = this.flipped ? y : 7 - y;
+      const edge = row + .5, low = Math.floor(edge), high = Math.min(8, low + 1);
+      const assetY = GRID_Y[low] + (GRID_Y[high] - GRID_Y[low]) * (edge - low);
+      const ratio = (assetY - GRID_Y[0]) / (GRID_Y[8] - GRID_Y[0]);
+      const left = GRID_TOP.left + (GRID_BOTTOM.left - GRID_TOP.left) * ratio;
+      const right = GRID_TOP.right + (GRID_BOTTOM.right - GRID_TOP.right) * ratio;
+      return { x: s.x + (left + (right - left) * (column + .5) / 8) / BOARD_SIZE * s.size, y: s.y + assetY / BOARD_SIZE * s.size };
+    };
+    for (const trail of visible) {
+      // Each route is composited once, so overlapping patches do not make its preview opaque.
+      paint.clearRect(0, 0, layer.width, layer.height);
+      const opacity = trail.phase === 'preview' ? .25 : .45;
+      for (const sample of terrainTrailSamples(trail.type, trail.from, trail.to)) {
+        const alpha = terrainTrailOpacity(trail.phase, trail.progress, sample.t) / opacity;
+        if (alpha > 0) drawHabitatTrailPatch(paint, trail.type, project(sample.x, sample.y), s.tile, alpha, sample.scale);
+      }
+      this.ctx.save(); this.ctx.beginPath(); this.ctx.rect(0, 0, this.cssWidth, this.cssHeight);
+      const blocked = new Set<string>(this.obstacles.map(o => o.square));
+      for (const piece of this.pieces) if (!visible.some(t => t.from === piece.square)) blocked.add(piece.square);
+      for (const square of blocked) {
+        const corners = this.squarePolygonPixels(square as Square);
+        this.ctx.moveTo(corners[0].x, corners[0].y);
+        for (const point of corners.slice(1)) this.ctx.lineTo(point.x, point.y);
+        this.ctx.closePath();
+      }
+      this.ctx.clip('evenodd'); this.ctx.globalAlpha = opacity * this.trailFade;
+      this.ctx.drawImage(layer, 0, 0); this.ctx.restore();
+    }
+  }
+
   private draw(): void {
     if (this.destroyed) return;
     const { ctx } = this;
@@ -685,6 +779,7 @@ export class BoardRenderer {
     }, s.tile);
     const ambience = this.shouldAnimateAmbience();
     if (ambience) this.drawAmbientRim(s);
+    this.drawMovementTrails(s);
     const orderedPieces = [...this.pieces].sort((a, b) => this.squarePoint(a.square).y - this.squarePoint(b.square).y);
     const dragging = this.habitatDrag;
     const towerSquares = new Set(this.obstacles.filter(obstacle => obstacle.kind === 'tower').map(obstacle => obstacle.square));

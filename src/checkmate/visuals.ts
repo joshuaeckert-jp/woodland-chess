@@ -96,7 +96,7 @@ export class TacticalRenderer {
   finishHabitatDrag(): void { this.habitatDragging=false; this.board.finishHabitatDrag(); this.syncAmbient() }
 
   async animate(before: GameState, after: GameState, events: GameEvent[], origin?: DeploymentOrigin, cue?:EffectCardCue): Promise<void> {
-    this.cancel()
+    this.cancel(undefined, true)
     const token = this.revision
     this.stopAmbient()
     this.pendingState = after
@@ -162,7 +162,7 @@ export class TacticalRenderer {
       this.raf = requestAnimationFrame(tick)
     })
   }
-  cancel(after?: GameState): void { this.stopAmbient(); this.habitatDragging=false; this.deploymentCard.cancel(); this.effectCard.cancel(); delete this.canvas.parentElement!.dataset.deploymentStage; ++this.revision; if (this.raf) cancelAnimationFrame(this.raf); this.raf = 0; this.effect = null; this.beforeState = null; this.events = []; this.cue=undefined; const resolve = this.pendingResolve; this.pendingResolve = null; const settled = after ?? this.pendingState; this.pendingState = null; if (settled) this.setState(settled); else this.draw(); this.board.cancel(settled ? pieces(settled) : undefined); resolve?.(); this.syncAmbient() }
+  cancel(after?: GameState, preserveBoardFrame = false): void { this.stopAmbient(); this.habitatDragging=false; this.deploymentCard.cancel(); this.effectCard.cancel(); delete this.canvas.parentElement!.dataset.deploymentStage; ++this.revision; if (this.raf) cancelAnimationFrame(this.raf); this.raf = 0; this.effect = null; this.beforeState = null; this.events = []; this.cue=undefined; const resolve = this.pendingResolve; this.pendingResolve = null; const settled = after ?? this.pendingState; this.pendingState = null; if (settled) this.setState(settled); else this.draw(); this.board.cancel(settled ? pieces(settled) : undefined, !preserveBoardFrame); resolve?.(); this.syncAmbient() }
   private readonly onVisibility = () => { if (document.hidden && this.pendingState) this.cancel(this.pendingState); this.syncAmbient() }
   destroy(): void { this.destroyed=true;this.stopAmbient();this.intersection?.disconnect(); document.removeEventListener('visibilitychange', this.onVisibility); this.cancel(); this.observer?.disconnect(); this.overlay.remove(); this.board.destroy() }
   celebrate(winner: Side|'draw'): Promise<void> { return this.board.celebrate(winner) }
