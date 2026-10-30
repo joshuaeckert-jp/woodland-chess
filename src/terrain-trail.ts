@@ -1,6 +1,8 @@
 import type { PieceSymbol, Square } from "chess.js";
 
 export const TERRAIN_TRAIL_RECEDE_MS = 360;
+export const TERRAIN_TRAIL_PREVIEW_OPACITY = .50;
+export const TERRAIN_TRAIL_FOLLOW_OPACITY = .75;
 
 export type TerrainTrailSample = {
   x: number;
@@ -87,15 +89,15 @@ export function terrainTrailSamples(type: PieceSymbol, from: Square, to: Square)
 
 /** Opacity for one terrain patch as a move trail is previewed, followed, then removed. */
 export function terrainTrailOpacity(phase: "preview" | "follow" | "recede", progress: number, t: number): number {
-  if (phase === "preview") return .25;
-  if (phase === "follow") return .45;
+  if (phase === "preview") return TERRAIN_TRAIL_PREVIEW_OPACITY;
+  if (phase === "follow") return TERRAIN_TRAIL_FOLLOW_OPACITY;
 
   const clampedProgress = clamp(progress);
-  if (clampedProgress === 0) return .45;
+  if (clampedProgress === 0) return TERRAIN_TRAIL_FOLLOW_OPACITY;
   if (clampedProgress === 1) return 0;
 
   // The fading edge travels origin-to-destination. Its soft edge avoids popping
   // individual patches while preserving the tail until the edge reaches it.
   const retreat = clamp((clampedProgress - .05) / .95);
-  return .45 * smoothstep((clamp(t) - retreat) / .22);
+  return TERRAIN_TRAIL_FOLLOW_OPACITY * smoothstep((clamp(t) - retreat) / .22);
 }

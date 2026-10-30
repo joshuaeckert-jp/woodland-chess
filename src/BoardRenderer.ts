@@ -4,7 +4,7 @@ import { BOARD_AMBIENCE_FRAME_MS, canRunBoardAmbience, idlePoseForPiece, rimMote
 import { drawCourtyardTiles, loadCourtyardArt } from "./courtyard-tiles";
 import { drawSquareHabitat, drawHabitatTrailPatch, loadSquareHabitatArt } from "./square-habitats";
 import { createAlignedStructureSprite } from "./checkmate/structure-ground";
-import { terrainTrailSamples, terrainTrailOpacity, TERRAIN_TRAIL_RECEDE_MS } from "./terrain-trail";
+import { terrainTrailSamples, terrainTrailOpacity, TERRAIN_TRAIL_RECEDE_MS, TERRAIN_TRAIL_PREVIEW_OPACITY, TERRAIN_TRAIL_FOLLOW_OPACITY } from "./terrain-trail";
 
 export type { BoardObstacle } from "./checkmate/obstacle-art";
 
@@ -419,7 +419,7 @@ export class BoardRenderer {
           }
           item.progress = ground;
           item.animalProgress = animal;
-          item.habitatOpacity = .55 + animal * .45;
+          item.habitatOpacity = 1;
           item.frame = poseFor(t, item.plan, item.piece.type, this.framesPerTeam(), restFrameForPiece(item.piece.color, this.flipped) === 16);
           item.animalCenter = undefined;
           item.habitatCenter = undefined;
@@ -556,7 +556,7 @@ export class BoardRenderer {
         const strike = Math.max(0, Math.min(1, (t - .56) / .18))
         actor.progress = effect.ranged ? 0 : easeInOut(Math.min(1, t / .28))
         actor.animalProgress = effect.ranged ? 0 : easeInOut(Math.max(0, Math.min(1, (t - .24) / .34)))
-        actor.habitatOpacity = this.trails.length ? .55 + actor.animalProgress * .45 : 1
+        actor.habitatOpacity = 1
         actor.frame = t < .24 ? (this.restFrame(attacker) === 16 ? 17 : 1) : t < .52 ? poseFor(.40 + (t-.24)/.28*.35, actor.plan, attacker.type, this.framesPerTeam(), this.restFrame(attacker) === 16) : t < .74 ? 8 : t < .86 ? 9 : (this.restFrame(attacker) === 16 ? 18 : 10)
         victim.frame = t < .56 ? this.restFrame(defender) : 9
         victim.animalCenter = { x: target.x + Math.sign(target.x - from.x) * Math.sin(strike*Math.PI) * this.scene().tile * .08, y: target.y + Math.sign(target.y - from.y) * Math.sin(strike*Math.PI) * this.scene().tile * .08 }
@@ -743,7 +743,7 @@ export class BoardRenderer {
     for (const trail of visible) {
       // Each route is composited once, so overlapping patches do not make its preview opaque.
       paint.clearRect(0, 0, layer.width, layer.height);
-      const opacity = trail.phase === 'preview' ? .25 : .45;
+      const opacity = trail.phase === 'preview' ? TERRAIN_TRAIL_PREVIEW_OPACITY : TERRAIN_TRAIL_FOLLOW_OPACITY;
       for (const sample of terrainTrailSamples(trail.type, trail.from, trail.to)) {
         const alpha = terrainTrailOpacity(trail.phase, trail.progress, sample.t) / opacity;
         if (alpha > 0) drawHabitatTrailPatch(paint, trail.type, project(sample.x, sample.y), s.tile, alpha, sample.scale);
@@ -783,11 +783,21 @@ export class BoardRenderer {
     const orderedPieces = [...this.pieces].sort((a, b) => this.squarePoint(a.square).y - this.squarePoint(b.square).y);
     const dragging = this.habitatDrag;
     const towerSquares = new Set(this.obstacles.filter(obstacle => obstacle.kind === 'tower').map(obstacle => obstacle.square));
+    // The square biome stays anchored to the board; only its small raised island travels.
+    if (dragging?.target && !towerSquares.has(dragging.target)) drawSquareHabitat(ctx, dragging.piece.type, this.squarePoint(dragging.target), s.tile, .5);
+    for (const item of this.transient.filter(item => item.role !== 'deployment').sort((a, b) => (a.role === 'victim' ? -1 : 0) - (b.role === 'victim' ? -1 : 0))) {
+      const trail = this.trails.find(trail => trail.from === item.piece.square && item.role !== 'victim');
+      if (trail) {
+        if (!towerSquares.has(trail.from)) drawSquareHabitat(ctx, item.piece.type, this.squarePoint(trail.from), s.tile, 1 - item.animalProgress);
+        if (!towerSquares.has(trail.to)) drawSquareHabitat(ctx, item.piece.type, this.squarePoint(trail.to), s.tile, .5 + item.animalProgress * .5);
+      } else if (!towerSquares.has(item.piece.square)) drawSquareHabitat(ctx, item.piece.type, this.squarePoint(item.piece.square), s.tile, item.opacity ?? 1);
+    }
     for (const obstacle of this.obstacles) this.drawObstacleGround(obstacle);
     for (let index = 0; index < orderedPieces.length; index++) {
       const piece = orderedPieces[index];
-      if (piece.square === dragging?.piece.square || towerSquares.has(piece.square)) continue;
       const point = this.squarePoint(piece.square);
+      if (piece.square === dragging?.piece.square) { drawSquareHabitat(ctx, piece.type, point, s.tile); continue; }
+      if (towerSquares.has(piece.square)) continue;
       this.drawHabitat(piece, point, 1, 1);
       if (ambience) this.drawIdleHabitatAccent(piece, point, idlePoseForPiece(piece.type, index, this.ambienceNow, s.tile));
     }
@@ -808,15 +818,14 @@ export class BoardRenderer {
       }
       this.drawAnimal(entry.piece, { x: point.x + celebration.x, y: point.y + celebration.y + (idle?.animalY ?? 0) }, celebration.frame || this.restFrame(entry.piece), 1, idle?.animalScale ?? 1, 1, false);
     }
-    if (dragging?.target) this.drawHabitat(dragging.piece, this.squarePoint(dragging.target), .28, .98);
-    if (dragging) this.drawHabitat(dragging.piece, dragging.point, .94, 1);
+    if (dragging) this.drawHabitat(dragging.piece, dragging.point, 1, 1, this.perchAt(dragging.piece.square), false);
     const transientDraw = this.transient.map((item) => ({
       item,
       habitat: item.habitatCenter ?? lerpPoint(item.from, item.to, item.progress),
       animal: item.animalCenter ?? lerpPoint(item.from, item.to, item.animalProgress),
     }));
     // Ground is its own layer. The defender is then visible beneath the attacker.
-    for (const entry of transientDraw) this.drawHabitat(entry.item.piece, entry.habitat, entry.item.habitatOpacity ?? entry.item.opacity ?? 1, entry.item.habitatScale ?? entry.item.scale ?? 1, this.perchAt(entry.item));
+    for (const entry of transientDraw) this.drawHabitat(entry.item.piece, entry.habitat, entry.item.habitatOpacity ?? entry.item.opacity ?? 1, entry.item.habitatScale ?? entry.item.scale ?? 1, this.perchAt(entry.item), entry.item.role === 'deployment');
     for (const entry of transientDraw.filter(({ item }) => item.role === "victim")) this.drawAnimal(entry.item.piece, entry.animal, entry.item.frame, entry.item.animalOpacity ?? entry.item.opacity ?? 1, entry.item.animalScale ?? entry.item.scale ?? 1, entry.item.habitatScale ?? entry.item.scale ?? 1, Boolean(entry.item.mirror), this.perchAt(entry.item));
     for (const entry of transientDraw.filter(({ item }) => item.role !== "victim")) {
       const motion = entry.item.role === "deployment" ? { x: 0, y: 0 } : speciesMotion(entry.item.piece.type, entry.item.frame, tForFrame(entry.item), s.tile);
@@ -1190,10 +1199,10 @@ export class BoardRenderer {
     this.drawAnimal(piece, animalCenter, frame, opacity, animalScale, scale, mirror);
   }
 
-  private drawHabitat(piece: RenderPiece, center: Point, opacity: number, scale: number, perch = this.perchAt(piece.square)): void {
+  private drawHabitat(piece: RenderPiece, center: Point, opacity: number, scale: number, perch = this.perchAt(piece.square), squareSurface = true): void {
     const s = this.scene();
     if (!perch) {
-      drawSquareHabitat(this.ctx, piece.type, center, s.tile, opacity, scale);
+      if (squareSurface) drawSquareHabitat(this.ctx, piece.type, center, s.tile, opacity, scale);
       const habitat = this.images.get("habitats");
       if (habitat) {
         const frame = (piece.color === "b" ? 6 : 0) + PIECE_ORDER.indexOf(piece.type);

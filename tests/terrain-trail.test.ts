@@ -43,9 +43,9 @@ describe("terrain trail", () => {
   });
 
   it("clamps opacity inputs and recedes from origin before the tail", () => {
-    expect(terrainTrailOpacity("preview", -10, 4)).toBe(.25);
-    expect(terrainTrailOpacity("follow", 10, -4)).toBe(.45);
-    expect(terrainTrailOpacity("recede", 0, 0)).toBe(.45);
+    expect(terrainTrailOpacity("preview", -10, 4)).toBe(.50);
+    expect(terrainTrailOpacity("follow", 10, -4)).toBe(.75);
+    expect(terrainTrailOpacity("recede", 0, 0)).toBe(.75);
     expect(terrainTrailOpacity("recede", .5, 0)).toBeLessThan(terrainTrailOpacity("recede", .5, 1));
     expect(terrainTrailOpacity("recede", 1, .5)).toBe(0);
     expect(TERRAIN_TRAIL_RECEDE_MS).toBe(360);
