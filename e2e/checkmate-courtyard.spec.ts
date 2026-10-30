@@ -87,7 +87,7 @@ test('Watchtower courtyard renders loaded terrain, complete polygon hitboxes, an
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
 
   const resources = await page.evaluate(() => performance.getEntriesByType('resource').map(entry => entry.name))
-  for (const asset of ['courtyard-stone-v1.webp', 'habitat-squares-v1.webp', 'wall-scenery.webp', 'tower-scenery.webp']) {
+  for (const asset of ['courtyard-stone-v1.webp', 'habitat-squares-v1.webp', 'structure-ground-v1.webp', 'wall-scenery.webp', 'tower-scenery.webp']) {
     expect(resources.some(name => name.endsWith(`/assets/checkmate/${asset}`))).toBe(true)
   }
 
@@ -136,4 +136,51 @@ test('Watchtower courtyard remains contained at 390 pixels', async ({ browser })
   await page.locator('.cm-board-wrap').screenshot({ path: 'review/checkmate-courtyard-phone.png' })
   expect(errors).toEqual([])
   await context.close()
+})
+
+test('aligned structure sprites preserve buildings while fading only their lower lateral pads', async ({ page }) => {
+  await page.goto('/')
+  const contracts = await page.evaluate(async () => {
+    const [{ createAlignedStructureSprite }, { OBSTACLE_SPRITE_LAYOUT }] = await Promise.all([
+      import('/src/checkmate/structure-ground.ts'),
+      import('/src/checkmate/obstacle-art.ts'),
+    ])
+    const load = (url: string) => new Promise<HTMLImageElement>((resolve, reject) => {
+      const image = new Image()
+      image.onload = () => resolve(image)
+      image.onerror = () => reject(new Error(`Unable to load ${url}`))
+      image.src = url
+    })
+    return Promise.all((['wall', 'tower'] as const).map(async kind => {
+      const image = await load(`/assets/checkmate/${kind}-scenery.webp`)
+      const original = document.createElement('canvas')
+      original.width = image.naturalWidth; original.height = image.naturalHeight
+      original.getContext('2d')!.drawImage(image, 0, 0)
+      const output = createAlignedStructureSprite(image, kind)
+      const before = original.getContext('2d')!.getImageData(0, 0, original.width, original.height).data
+      const after = output.getContext('2d')!.getImageData(0, 0, output.width, output.height).data
+      const band = kind === 'wall' ? .60 : .70
+      const contactEnd = kind === 'wall' ? .89 : .90
+      const tile = output.width / OBSTACLE_SPRITE_LAYOUT[kind].footprint
+      let upperAlphaChanged = 0, upperOpaqueRgbChanged = 0, reducedLateral = 0, retainedContact = 0
+      for (let y = 0; y < output.height; y++) for (let x = 0; x < output.width; x++) {
+        const index = (y * output.width + x) * 4
+        const sourceAlpha = before[index + 3], outputAlpha = after[index + 3]
+        if (y < Math.ceil(output.height * band) && sourceAlpha !== outputAlpha) upperAlphaChanged++
+        // Canvas readback can round RGB in antialiased, semitransparent WebP pixels after putImageData.
+        // The solid building pixels, whose visible RGB matters, must stay byte-identical.
+        if (y < Math.ceil(output.height * band) && sourceAlpha === 255 && (before[index] !== after[index] || before[index + 1] !== after[index + 1] || before[index + 2] !== after[index + 2])) upperOpaqueRgbChanged++
+        const distance = Math.abs(x - output.width / 2)
+        if (y >= output.height * band && distance >= tile * .52 && sourceAlpha > 0 && outputAlpha < sourceAlpha) reducedLateral++
+        if (y >= output.height * contactEnd && distance <= tile * .20 && sourceAlpha > 0 && outputAlpha === sourceAlpha) retainedContact++
+      }
+      return { kind, upperAlphaChanged, upperOpaqueRgbChanged, reducedLateral, retainedContact }
+    }))
+  })
+  for (const contract of contracts) {
+    expect(contract.upperAlphaChanged, JSON.stringify(contract)).toBe(0)
+    expect(contract.upperOpaqueRgbChanged, JSON.stringify(contract)).toBe(0)
+    expect(contract.reducedLateral).toBeGreaterThan(0)
+    expect(contract.retainedContact).toBeGreaterThan(0)
+  }
 })

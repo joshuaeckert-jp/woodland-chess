@@ -50,3 +50,7 @@ Restore v1 wall/tower sprites and their original geometry (1.10 footprint; wall 
 ## Full-square structure foundations (v0.29)
 
 Keep v1 art and camera; increase wall/tower sprite footprint from1.10 to1.28 tiles. Scale the tower's physical height and roof elevation together from the authored562/512 aspect and .86/.24 anchors, so nest, feet, travel and projectile origins stay aligned. Paint a full projected square of moss-tinted stone with sparse chips and a broken paving approach below all structure/animal/highlight layers. The visual foundation and silhouette have no extra collision area; demolition removes both naturally with the obstacle state.
+
+## Structure ground alignment (v0.30)
+
+Preserve the existing building angle and original masonry pixels. Load a separate moss/paver texture into each actual projected board polygon so all four ground edges follow the chess square. Cache a lower-band alpha treatment of each original sprite, removing lateral diamond tips and blending its front point into the square foundation. Wall clipping begins below60% height and tower below70%; a central contact lane retains doorway roots and steps. Original source files, RGB colors, sprite positions, ground/deck anchors and enlarged tower elevation are unchanged. The cached treatment runs only at image load; there is no per-frame image-data work. Board flip moves scenery to the corresponding projected square without rotating its body.

@@ -311,3 +311,11 @@ Published 2026-10-30. Worker `684d516c-3fa4-4602-942b-38d536b8e830`.
 Enlarged the existing wall/tower artwork by roughly16%, preserving the restored designs. Full-square projected stone-and-moss foundations and broken approach paving connect the original illustrated ground to every edge of the occupied field. Foundations render below highlights and animals. Tower roof elevation scales with the authored art, keeping animal feet, nests, movement and shots aligned. Visual spill does not change one-square collision or selection.
 
 Validation: production build and160 unit tests pass;5 courtyard/Watchtower browser checks pass, including both desktop and390px touch solutions, flip, reload and demolition. Desktop/phone imagery inspected. Published tower route completed on both sizes without browser errors or overflow.
+
+## v0.30 — Board-aligned structure ground
+
+Published 2026-10-30. Worker `1fbb9f3d-25cb-4d67-bb91-5fdb9cf2cd56`.
+
+Wall and tower buildings retain the enlarged original artwork and angle. Their ground now uses a separate moss/paver texture clipped to the actual projected chess square. A cached lower-band alpha treatment blends the original diamond-shaped pad into that foundation, removing lateral tips and the pointed approach while preserving doorway/root/step contact. Source artwork, upper masonry colors and alpha, anchors, roof elevation and shot origins remain unchanged. The replacement texture aligns with the board on either orientation; fallback ground still works if it cannot load.
+
+Validation: production build and160 unit tests pass. Six courtyard/mask/Watchtower browser tests pass, including byte-preserved upper opaque masonry, preserved upper alpha, reduced lateral pad alpha, retained contact lane, flipped squares and both390px touch solutions. Desktop/phone scenes inspected. Live Watchtower route completed at1280/390 with no errors or overflow.

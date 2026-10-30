@@ -3,6 +3,7 @@ import { OBSTACLE_SPRITE_LAYOUT, obstacleGeometry, towerPerchElevation, type Boa
 import { BOARD_AMBIENCE_FRAME_MS, canRunBoardAmbience, idlePoseForPiece, rimMoteAt } from "./board-ambience";
 import { drawCourtyardTiles, loadCourtyardArt } from "./courtyard-tiles";
 import { drawSquareHabitat, loadSquareHabitatArt } from "./square-habitats";
+import { createAlignedStructureSprite } from "./checkmate/structure-ground";
 
 export type { BoardObstacle } from "./checkmate/obstacle-art";
 
@@ -195,6 +196,7 @@ function loadOptionalImage(url: string): Promise<HTMLImageElement | null> {
 }
 
 export class BoardRenderer {
+  private readonly alignedStructures = new Map<string, HTMLCanvasElement>();
   readonly ready: Promise<void>;
   private readonly ctx: CanvasRenderingContext2D;
   private readonly images = new Map<string, HTMLImageElement>();
@@ -238,8 +240,9 @@ export class BoardRenderer {
       ...Object.values(SPECIES).map((species) => loadImage(`/assets/sprites/${species}.webp`).then((image) => this.images.set(species, image))),
       loadImage("/assets/sprites/habitats.webp").then((image) => this.images.set("habitats", image)),
       loadImage("/assets/board.webp").then((image) => this.images.set("board", image)),
-      loadOptionalImage("/assets/checkmate/wall-scenery.webp").then((image) => { if (image) this.images.set("obstacle-wall", image); }),
-      loadOptionalImage("/assets/checkmate/tower-scenery.webp").then((image) => { if (image) this.images.set("obstacle-tower", image); }),
+      loadOptionalImage("/assets/checkmate/wall-scenery.webp").then((image) => { if (image) { this.images.set("obstacle-wall", image); this.alignedStructures.set('wall', createAlignedStructureSprite(image, 'wall')); } }),
+      loadOptionalImage("/assets/checkmate/tower-scenery.webp").then((image) => { if (image) { this.images.set("obstacle-tower", image); this.alignedStructures.set('tower', createAlignedStructureSprite(image, 'tower')); } }),
+      loadOptionalImage("/assets/checkmate/structure-ground-v1.webp").then((image) => { if (image) this.images.set("obstacle-ground", image); }),
     ]).then(() => undefined);
     const resize = () => this.resize();
     this.observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(resize);
@@ -929,6 +932,15 @@ export class BoardRenderer {
     ctx.save(); ctx.beginPath(); ctx.moveTo(corners[0].x, corners[0].y);
     for (const corner of corners.slice(1)) ctx.lineTo(corner.x, corner.y);
     ctx.closePath(); ctx.clip();
+    const ground = this.images.get('obstacle-ground');
+    if (ground) {
+      const left = Math.min(...corners.map(p => p.x)), right = Math.max(...corners.map(p => p.x));
+      const top = Math.min(...corners.map(p => p.y)), bottom = Math.max(...corners.map(p => p.y));
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(ground, left, top, right - left, bottom - top);
+      ctx.restore();
+      return;
+    }
     ctx.fillStyle = 'rgba(72, 82, 48, .46)'; ctx.fill();
     const seed = obstacle.square.charCodeAt(0) + Number(obstacle.square[1]) * 13;
     for (let i = 0; i < 40; i++) {
@@ -961,7 +973,7 @@ export class BoardRenderer {
       const drawWidth = sprite.naturalWidth * scale, drawHeight = sprite.naturalHeight * scale
       ctx.save(); ctx.imageSmoothingEnabled = false
       if (obstacle.kind === 'tower' && obstacle.spent) ctx.filter = 'saturate(0.3) brightness(0.72)'
-      ctx.drawImage(sprite, Math.round(center.x - drawWidth / 2), Math.round(baseY - drawHeight * layout.groundAnchor), Math.round(drawWidth), Math.round(drawHeight))
+      ctx.drawImage(this.alignedStructures.get(obstacle.kind) ?? sprite, Math.round(center.x - drawWidth / 2), Math.round(baseY - drawHeight * layout.groundAnchor), Math.round(drawWidth), Math.round(drawHeight))
       ctx.restore()
       return
     }
