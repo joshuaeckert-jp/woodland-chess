@@ -1,0 +1,248 @@
+body.checkmate-mode{margin:0;min-width:320px;background:#102330;color:#eee5cd;font-family:system-ui,sans-serif;color-scheme:dark}
+body.checkmate-mode *{box-sizing:border-box}body.checkmate-mode [hidden]{display:none!important}
+body.checkmate-mode button,body.checkmate-mode select,body.checkmate-mode input{font:inherit}
+body.checkmate-mode button{cursor:pointer;touch-action:manipulation}body.checkmate-mode button:disabled{opacity:.5;cursor:default}
+body.checkmate-mode :is(button,select,input):focus-visible{outline:3px solid #f0ce79;outline-offset:3px}
+.cm-board-wrap canvas{display:block;width:100%;height:100%;image-rendering:pixelated}.cm-squares{position:absolute;inset:0}
+.cm-squares button{position:absolute;border:0;padding:0;background:transparent;min-width:0;min-height:0}.cm-squares button:focus-visible{outline:0}
+.cm-loading{position:absolute;inset:0;display:grid;place-content:center;gap:10px;background:#102330;color:#eee5cd}
+.cm-tabs{display:flex;gap:4px;position:sticky;top:-12px;background:#102330;z-index:1;border-bottom:1px solid #71553a;margin-bottom:8px}
+.cm-tabs button{min-height:40px;padding:7px 9px;border:0;background:transparent;color:#c8c0ad;font-size:12px}.cm-tabs button.active{color:#f0d69f;border-bottom:2px solid #c49b55}
+.cm-intent{color:#e7d3a3;font-size:13px;line-height:1.45;margin:8px 0}.cm-quiet{min-height:40px;padding:5px;border:0;background:transparent;color:#e7d3a3;text-decoration:underline}
+.cm-error{color:#ffd09a;font-size:12px;line-height:1.5;min-height:18px;margin:8px 0}.cm-draw-note{font-size:12px;line-height:1.4;color:#e7d3a3;background:#344331;padding:7px;border-radius:4px}
+.cm-tray p,.cm-tray summary{font-size:12px;line-height:1.5}.cm-tray details{border-top:1px solid #71553a;padding-top:8px;margin-top:12px}.cm-tray summary{min-height:40px;display:flex;align-items:center;cursor:pointer;color:#e7d3a3}
+.cm-deck-summary{display:flex;gap:9px;align-items:center;padding:7px 0 10px;border-bottom:1px solid #71553a}.cm-deck-summary img{flex:none;image-rendering:pixelated;border-radius:3px}.cm-deck-summary div{display:grid;gap:3px}.cm-deck-summary b{font-size:13px}.cm-deck-summary span,.cm-deck-summary small{font-size:11px;line-height:1.4;color:#c9c0ae}
+.cm-legacy-note{color:#e7d3a3}.cm-table-guide{color:#c9c0ae}.cm-journal{padding-left:18px;font-size:12px;line-height:1.6;color:#ddd0b3}.cm-journal li{margin-bottom:7px}
+/* The two rows belong to board sides; flipping changes their physical location. */
+.cm-drag-source{opacity:.3!important}.cm-card-ghost{position:fixed;z-index:20;pointer-events:none;transform:translate(-50%,-65%) rotate(-3deg);width:128px;filter:drop-shadow(0 7px 7px #0009)}
+body.checkmate-mode .cm-card-ghost .tcg-card{width:128px;height:185px;transform:none;margin:0}.cm-drop-caption{display:block;width:170px;margin:10px -21px 0;padding:6px;background:#38241b;border:1px solid #c49b55;border-radius:4px;color:#eee5cd;font-size:11px;text-align:center;line-height:1.4}.cm-ghost-valid .cm-drop-caption{background:#344a36;border-color:#e9cf8b}
+.cm-unit-row{display:grid;gap:7px}.cm-unit{display:grid;grid-template-columns:42px minmax(0,1fr);gap:3px 6px;min-height:52px;padding:5px;border:1px solid #596b50;border-radius:5px;background:#21332f;color:#eee5cd;text-align:left}.cm-unit i{grid-row:span 2;width:36px;height:36px;background-image:var(--species);background-size:400% 1000%;background-position:var(--sprite-x) var(--sprite-y);background-repeat:no-repeat;image-rendering:pixelated}.cm-unit b{font-size:12px}.cm-unit small{font-size:10px;line-height:1.4;color:#c9c0ae}
+/* Native dialogs preserve touch, focus and keyboard behavior. */
+body.checkmate-mode dialog{width:min(720px,calc(100vw - 24px));max-height:88dvh;overflow:auto;padding:20px;border:2px solid #c49b55;border-radius:9px;background:#38241b;color:#eee5cd}
+body.checkmate-mode dialog::backdrop{background:#07141bd9}body.checkmate-mode dialog h2{margin:0 0 14px;font:600 22px Georgia,serif;color:#f0d69f}body.checkmate-mode dialog p{line-height:1.5}
+body.checkmate-mode dialog label{display:block;margin:8px 0;font-size:12px}body.checkmate-mode dialog select,body.checkmate-mode dialog input{max-width:100%;padding:7px;border:1px solid #806541;border-radius:4px;background:#1c2b30;color:#eee5cd}body.checkmate-mode dialog select{width:100%;min-height:40px}
+body.checkmate-mode .primary,body.checkmate-mode .secondary{min-height:42px;margin:4px 2px;padding:9px 11px;border-radius:5px}body.checkmate-mode .primary{border:1px solid #e0bf76;background:#c49b55;color:#23170e}body.checkmate-mode .secondary{border:1px solid #78925b;background:#253730;color:#eee5cd}
+.cm-muted{font-size:12px;color:#c9c0ae}.cm-match-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}.cm-opening-settings{min-width:0;border:1px solid #71553a;padding:12px;margin:12px 0}.cm-opening-settings legend{padding:0 6px;color:#f0d69f}.cm-opening-preview{font-size:12px;line-height:1.5;color:#e7d3a3;margin:10px 0}.cm-opening-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+body.checkmate-mode dialog .cm-opening-card{display:grid;grid-template-columns:18px 46px minmax(0,1fr);gap:4px 7px;align-items:center;margin:0;padding:9px;border:1px solid #71553a;border-radius:5px;background:#21302e;cursor:pointer}.cm-opening-card input{grid-row:1/3;accent-color:#c49b55;width:18px;height:18px;margin:0}.cm-opening-card i{grid-column:2;grid-row:1/3;width:46px;height:46px;background-image:url('/assets/checkmate/effects.webp');background-size:400% 300%;background-position:var(--card-x) var(--card-y);background-repeat:no-repeat;image-rendering:pixelated}.cm-opening-card b{grid-column:3;font-size:12px}.cm-opening-card small{grid-column:3;font-size:11px;line-height:1.4;color:#c9c0ae}body.checkmate-mode dialog .cm-opening-card:has(input:checked){border-color:#c49b55;background:#344331}.cm-opening-card:has(input:disabled){opacity:.6}
+.cm-army-builder summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:#e7d3a3}.cm-rosters{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-height:52dvh;overflow:auto}.cm-rosters fieldset{min-width:0;border:1px solid #71553a}.cm-rosters legend{color:#f0d69f}.cm-rosters label{display:grid!important;grid-template-columns:68px minmax(0,1fr);gap:6px;align-items:center;border-bottom:1px solid #5a4530;padding-bottom:6px}.cm-variant-info{grid-column:1/-1;font-size:11px;line-height:1.4;color:#c9c0ae;margin:2px 0 8px}.cm-setup-actions{position:sticky;bottom:-20px;background:#38241b;padding-top:10px;margin-top:8px}
+.cm-codex-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cm-codex-cards article{padding:10px;background:#1d2c2b;border:1px solid #735737;border-radius:5px}.cm-codex-cards h3{font-size:14px;margin:0}.cm-codex-cards p{font-size:13px}.cm-codex-cards small{font-size:12px;color:#c9c0ae}
+.cm-hand-tabs{display:flex;gap:4px;align-items:center}.cm-hand-tabs[hidden]{display:none}
+.cm-hand-tabs button{font:inherit;line-height:18px;padding:0 8px;border:1px solid #7b715b;border-radius:4px;background:#152b2b;color:#ddd2b8;cursor:pointer;white-space:nowrap}
+.cm-hand-tabs button[aria-pressed="true"]{background:#e1c48b;color:#1b2523;border-color:#e1c48b}
+.cm-hand-tabs button:focus-visible{outline:2px solid #f2dda9;outline-offset:2px}
+.cm-hand-heading{gap:6px}.cm-hand-heading>span{white-space:nowrap}
+.cm-army-mode{display:grid;gap:6px;margin-top:16px}
+#cm-squares button.cm-drop-active{background:#e5cb7140;box-shadow:inset 0 0 0 2px #ebc978;border:0}
+@media(max-width:720px){.cm-hand-heading{padding:0 6px;font-size:9px}.cm-hand-tabs{gap:3px}.cm-hand-tabs button{padding:0 5px;line-height:16px}.cm-hand-heading b{font-size:9px}}
+
+/* A committed card becomes ground in the board's existing perspective. */
+.cm-deployment-card{position:fixed;z-index:20;pointer-events:none;transform-origin:center;will-change:transform,opacity}
+body.checkmate-mode .cm-deployment-card .tcg-card{width:100%;height:100%;margin:0;transform:none;pointer-events:none;min-width:0}
+.cm-deployment-card .tcg-card__frame{overflow:hidden}
+@media(prefers-reduced-motion:reduce){.cm-deployment-card{display:none}}
+
+
+/* One viewport budget. The board owns the remaining space; the hand is a
+   shallow control strip, not a second full-height information panel. */
+body.checkmate-mode{height:100dvh;overflow:hidden}
+.cm-game{
+ --table-hud:36px;--table-hand:94px;--table-rail:114px;--support-card-height:70px;
+ --table-board:min(calc(100vw - 16px),calc(100dvh - var(--table-hud) - var(--table-hand) - var(--table-rail) - var(--table-rail) - 32px));
+ height:100dvh;min-height:0;display:grid;grid-template-columns:minmax(0,1fr);
+ grid-template-rows:var(--table-hud) minmax(0,1fr) var(--table-hand);gap:4px;padding:8px;overflow:hidden;
+}
+.cm-arena{grid-column:1;grid-row:2;min-width:0;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.cm-board-wrap{position:relative;width:var(--table-board);height:var(--table-board);aspect-ratio:1;flex:none}
+.cm-bank-mount{width:min(calc(100vw - 16px),288px);height:var(--table-rail);flex:none;min-width:0;min-height:0}
+.cm-support-bank{position:relative;width:100%;height:100%;border:0;padding:0;background:transparent;isolation:isolate}
+.cm-support-bank header{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.cm-support-bank header b{font-weight:700;color:#e7d3a3}
+.cm-altar-art{position:absolute;z-index:0;inset:14px 0 auto;width:100%;height:auto;aspect-ratio:3;pointer-events:none;image-rendering:pixelated;object-fit:contain;object-position:center bottom}
+.cm-altar-vertical{display:none}
+[data-support-side="b"] .cm-altar-art{filter:saturate(.8) brightness(.92)}
+.cm-bank-slots{position:absolute;inset:auto 11% 41px;height:var(--support-card-height);z-index:2;display:grid;grid-template-columns:repeat(var(--slot-count),minmax(0,1fr));gap:8px;align-items:center;justify-items:center}
+.cm-support-slot{position:relative;width:100%;height:100%;min-width:0;display:grid;place-items:center;border:0;background:transparent;isolation:isolate}
+/* Cards stand on the illustrated ledge; no extra frame obscures the art. */
+.cm-support-slot::before,.cm-support-slot::after{display:none}
+.cm-slot-empty{font-size:0}
+.cm-support-slot:has(.tcg-state-ready){cursor:grab}
+body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support{position:absolute;left:50%;top:50%;width:54px;height:70px;min-height:0;max-height:none;margin:0;transform:translate(-50%,-50%);transform-origin:center;touch-action:none;z-index:1}
+body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support.tcg-exhausted{transform:translate(-50%,-50%)}
+body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support .tcg-card__frame{padding:2px;gap:1px;border-top-width:3px}
+body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support .tcg-card__topline{display:none}
+body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support .tcg-card__title{padding-right:0;overflow:visible;font-size:7px;line-height:9px;text-overflow:clip;white-space:normal}
+body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support .tcg-card__art{height:34px}
+body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support :is(.tcg-card__effect,.tcg-card__category,.tcg-card__footer){display:none}
+/* Shrine cards keep their backs as art; the cooldown moves to the stone ledge. */
+body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support .tcg-card__back :is(.tcg-card__cooldown-number,.tcg-card__cooldown-label){display:none}
+.cm-shrine-medallion{--shrine-leaf:#73ad71;position:absolute;z-index:2;left:50%;bottom:-12px;display:grid;width:24px;height:24px;place-items:center;transform:translateX(-50%);border:2px solid #5a3c21;border-radius:50%;background:radial-gradient(circle at 35% 28%,#f7d485 0 10%,#bd8031 11% 54%,#5a351d 55%);box-shadow:0 1px 0 #e8bc62,inset 0 0 0 1px #f8de9a,0 2px 0 #1c302b;pointer-events:none}
+.cm-shrine-medallion::before{content:'';position:absolute;inset:3px;border:1px solid #563719;border-radius:50%;box-shadow:inset 0 0 0 1px #f8db8599}
+.cm-shrine-leaf{position:absolute;left:3px;bottom:3px;width:10px;height:10px;color:var(--shrine-leaf);fill:currentColor;filter:drop-shadow(1px 1px 0 #263526)}
+.cm-shrine-count{position:absolute;right:3px;top:3px;width:10px;height:10px;color:#fff0a7;fill:currentColor;filter:drop-shadow(0 0 2px var(--shrine-leaf)) drop-shadow(1px 1px 0 #513318)}
+.cm-shrine-medallion[data-state="exhausted"] .cm-shrine-leaf,.cm-shrine-medallion:not([data-state="exhausted"]) .cm-shrine-count{display:none}
+.cm-shrine-sparks{position:absolute;inset:1px;border-radius:50%;background:radial-gradient(circle at 27% 35%,#fff2b1 0 1px,transparent 1.5px),radial-gradient(circle at 72% 25%,#fff2b1 0 1px,transparent 1.5px),radial-gradient(circle at 78% 72%,#fff2b1 0 1px,transparent 1.5px);opacity:.78}
+.cm-shrine-medallion[data-state="locked"]{filter:saturate(.72) brightness(.86)}.cm-shrine-medallion[data-state="exhausted"]{filter:saturate(.48) brightness(.7)}
+.cm-shrine-medallion[data-card-category="Defense"],.cm-shrine-medallion[data-card-category="Buff"],.cm-shrine-medallion[data-card-category="Order"]{--shrine-leaf:#73abd2}.cm-shrine-medallion[data-card-category="Healing"],.cm-shrine-medallion[data-card-category="Recovery"]{--shrine-leaf:#76b96e}.cm-shrine-medallion[data-card-category="Damage"],.cm-shrine-medallion[data-card-category="Debuff"]{--shrine-leaf:#df7656}.cm-shrine-medallion[data-card-category="Control"],.cm-shrine-medallion[data-card-category="Terrain"],.cm-shrine-medallion[data-card-category="Trap"]{--shrine-leaf:#aa7ec7}.cm-shrine-medallion[data-card-category="Equipment"]{--shrine-leaf:#e1b34e}
+@keyframes cm-shrine-medallion-dissolve{0%{opacity:0;transform:translateY(-3px) scale(.72)}45%{opacity:1;transform:translateY(1px) scale(1.14)}100%{opacity:1;transform:translateY(0) scale(1)}}
+.cm-shrine-medallion.cm-medallion-changed :is(.cm-shrine-leaf,.cm-shrine-count){animation:cm-shrine-medallion-dissolve 240ms steps(4,end) both}.cm-shrine-medallion.cm-medallion-changed .cm-shrine-count{animation-delay:45ms}
+.cm-card-home--support{pointer-events:none}
+.cm-support-bank.cm-drop-active .cm-altar-art{filter:brightness(1.35)}
+.cm-support-bank.cm-drop-active::after{content:'';position:absolute;inset:16px 10% 6px;border:2px solid #e9cb7c;pointer-events:none;box-shadow:0 0 12px #e9cb7c66}
+.cm-drop-active{border:0;background:transparent;box-shadow:none}
+
+.cm-hand-dock{position:relative;grid-column:1;grid-row:3;width:min(880px,100%);height:var(--table-hand);min-width:0;justify-self:center;align-self:end;overflow:hidden}
+.cm-hand-heading{height:22px;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:0 8px;color:#c9c0ae;font-size:10px;line-height:20px}
+.cm-hand-heading b{color:#e7d3a3}.cm-hand-heading>span{white-space:nowrap}
+.cm-hand-fan{--hand-overlap:40px;display:flex;align-items:flex-start;justify-content:center;height:calc(100% - 22px);padding:12px 14px 0;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scrollbar-width:none;isolation:isolate}
+.cm-hand-fan::-webkit-scrollbar{display:none}
+body.checkmate-mode .cm-hand-fan .cm-card.tcg-card.tcg-card--hand,.cm-hand-fan .cm-card-home{flex:0 0 108px;width:108px;height:158px;min-height:0;margin-left:calc(-1 * var(--hand-overlap));touch-action:pan-x}
+body.checkmate-mode .cm-hand-fan .cm-card.tcg-card.tcg-card--hand:first-child,.cm-hand-fan .cm-card-home:first-child{margin-left:0}
+.cm-hand-fan .cm-card-home{pointer-events:none}
+body.checkmate-mode .cm-hand-fan .cm-card.tcg-card.tcg-card--hand .tcg-card__title{font-size:9px;line-height:11px}
+body.checkmate-mode .cm-hand-fan .cm-card.tcg-card.tcg-card--hand .tcg-card__art{height:62px}
+.cm-hand-fan:has(> :nth-child(12)){justify-content:flex-start}
+.cm-hand-empty{margin:12px auto;color:#c9c0ae;font-size:12px;line-height:1.5;text-align:center}
+/* Help stays available to assistive technology; the hand itself teaches the gesture. */
+.cm-hand-help{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.cm-ribbon{position:fixed;z-index:5;top:8px;left:50%;transform:translateX(-50%);width:min(330px,calc(100vw - 76px));min-height:36px;margin:0;padding:8px 10px;border:1px solid #80633c;border-radius:4px;background:#38241b;color:#eee5cd;text-align:center;font-size:11px;line-height:18px}
+.cm-menu{position:fixed;z-index:5;top:8px;right:8px;width:40px;height:40px;border:1px solid #c49b55;border-radius:5px;background:#38241b;color:#eee5cd;font-size:20px;box-shadow:0 2px 0 #170e0a}
+.cm-tray{display:none;position:fixed;z-index:8;top:56px;right:8px;width:min(320px,calc(100vw - 16px));max-height:calc(100dvh - 68px);margin:0;padding:12px;overflow:auto;overscroll-behavior:contain;background:#102330fa;border:1px solid #71553a;border-radius:5px;box-shadow:0 10px 30px #0008}
+.cm-tools-open .cm-tray,.cm-game[data-phase="deployment"] .cm-tray,.cm-tray:has(#cm-error:not(:empty)),.cm-tray:has(#cm-retry-ai:not([hidden])){display:block}
+.cm-tools-close{display:block}.cm-game[data-phase="deployment"] .cm-tools-close{display:none}
+#cm-unit-copy .tcg-card{margin:auto}
+
+/* Landscape trades horizontal margins for board area. Never shrink the board
+   to make oversized shrine ornaments or full card descriptions fit. */
+@media(min-width:600px) and (min-height:481px) and (min-aspect-ratio:6/5){
+ .cm-game{--table-hand:124px;--table-wing:144px;--table-board:min(calc(100vw - var(--table-wing) - var(--table-wing) - 48px),calc(100dvh - var(--table-hud) - var(--table-hand) - 24px))}
+ .cm-arena{display:grid;grid-template-columns:var(--table-wing) var(--table-board) var(--table-wing);grid-template-rows:var(--table-board);gap:12px;justify-content:center;align-content:center}
+ .cm-board-wrap{grid-column:2;grid-row:1}
+ #cm-far-bank{grid-column:1;grid-row:1}#cm-near-bank{grid-column:3;grid-row:1}
+ .cm-bank-mount{width:var(--table-wing);height:min(var(--table-board),calc(var(--table-wing) * 3 + 16px));align-self:center}
+ .cm-support-bank{--support-card-height:130px}
+ .cm-support-bank header{left:4px;right:4px;font-size:8px}
+ .cm-support-bank header span{font-size:9px;max-width:24px;overflow:hidden}
+ .cm-altar-horizontal{display:none}.cm-altar-vertical{display:block;inset:14px 0 0;width:100%;height:calc(100% - 14px);aspect-ratio:auto}
+ .cm-bank-slots{inset:14px 0 0;height:auto;display:block}
+ .cm-support-slot{position:absolute;left:12%;width:76%;height:var(--support-card-height)}
+ .cm-support-slot:nth-child(1){top:calc(34.7% - var(--support-card-height))}.cm-support-slot:nth-child(2){top:calc(62.5% - var(--support-card-height))}.cm-support-slot:nth-child(3){top:calc(89% - var(--support-card-height))}
+ body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support{width:88px;height:130px}
+ body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support .tcg-card__title{font-size:9px;line-height:11px}
+ body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support .tcg-card__art{height:70px}
+}
+@media(min-width:600px) and (max-width:899px) and (min-height:481px) and (min-aspect-ratio:6/5){
+ .cm-game{--table-wing:110px}
+ body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support{width:76px}
+}
+@media(max-width:720px){
+ .cm-match-fields,.cm-opening-grid,.cm-rosters,.cm-codex-cards{grid-template-columns:1fr}
+ .cm-hand-heading{font-size:9px;padding:0 4px}.cm-hand-tabs{gap:3px}.cm-hand-tabs button{padding:0 5px;line-height:18px}
+}
+@media(max-width:500px){.cm-ribbon{left:8px;right:56px;width:auto;transform:none}}
+@media(max-height:720px) and (max-aspect-ratio:6/5){.cm-game{--table-hand:112px;--support-card-height:70px;--table-rail:112px}.cm-bank-mount{width:min(calc(100vw - 16px),288px)}.cm-support-bank header{font-size:8px}body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support{width:54px;height:70px}body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support .tcg-card__art{height:28px}.cm-shrine-medallion{width:22px;height:22px;bottom:-11px}.cm-shrine-leaf{left:3px;bottom:3px;width:9px;height:9px}.cm-shrine-count{right:3px;top:3px;width:9px;height:9px}}
+@media(max-height:480px) and (orientation:landscape){
+ .cm-game{--table-hud:36px;--table-hand:86px;--table-wing:94px;--table-board:min(calc(100vw - 228px),calc(100dvh - 146px));padding:4px;gap:3px}
+ .cm-arena{display:grid;grid-template-columns:var(--table-wing) var(--table-board) var(--table-wing);grid-template-rows:var(--table-board);gap:8px;justify-content:center;align-content:center}
+ .cm-board-wrap{grid-column:2;grid-row:1}#cm-far-bank{grid-column:1;grid-row:1}#cm-near-bank{grid-column:3;grid-row:1}
+ .cm-bank-mount{width:var(--table-wing);height:min(var(--table-board),calc(var(--table-wing) * 3 + 16px));align-self:center}
+ .cm-support-bank{--support-card-height:130px}
+ .cm-altar-horizontal{display:none}.cm-altar-vertical{display:block;inset:14px 0 0;width:100%;height:calc(100% - 14px);aspect-ratio:auto}
+ .cm-support-bank{--support-card-height:52px}
+ .cm-bank-slots{inset:14px 0 0;height:auto;display:block}
+ .cm-support-slot{position:absolute;left:12%;width:76%;height:var(--support-card-height)}
+ .cm-support-slot:nth-child(1){top:calc(34.7% - var(--support-card-height))}.cm-support-slot:nth-child(2){top:calc(62.5% - var(--support-card-height))}.cm-support-slot:nth-child(3){top:calc(89% - var(--support-card-height))}
+ .cm-support-bank header{font-size:7px;line-height:12px}.cm-support-bank header span{display:none}
+ body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support{width:38px;height:52px}
+ body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support .tcg-card__title{font-size:5px;line-height:6px}
+ body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support .tcg-card__art{height:20px}
+ .cm-shrine-medallion{width:20px;height:20px;bottom:-10px;border-width:1px}.cm-shrine-medallion::before{inset:2px}.cm-shrine-leaf{left:2px;bottom:2px;width:8px;height:8px}.cm-shrine-count{right:2px;top:2px;width:8px;height:8px}
+ .cm-hand-heading{height:18px;font-size:9px}.cm-hand-fan{height:calc(100% - 18px);padding-top:8px}
+ body.checkmate-mode .cm-hand-fan .cm-card.tcg-card.tcg-card--hand,.cm-hand-fan .cm-card-home{width:86px;height:124px;flex-basis:86px}
+ .cm-ribbon{top:4px;min-height:30px;padding:5px 8px;font-size:10px}.cm-menu{top:4px;right:4px;width:34px;height:34px}
+}
+@media(prefers-reduced-motion:reduce){body.checkmate-mode *,body.checkmate-mode *::before,body.checkmate-mode *::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}.cm-deployment-card{display:none}}
+
+/* Legacy five-slot saves keep their capacity and rest on the same ledge. */
+body.checkmate-mode .cm-support-bank[style*="--slot-count:5"] .cm-support-slot .cm-card.tcg-card.tcg-card--support{top:auto;bottom:0;transform:translateX(-50%) scale(.45);transform-origin:center bottom}
+body.checkmate-mode .cm-support-bank[style*="--slot-count:5"] .cm-support-slot .cm-card.tcg-card.tcg-card--support.tcg-exhausted{transform:translateX(-50%) scale(.45)}
+
+@media(min-width:900px) and (min-aspect-ratio:6/5),(max-height:480px) and (orientation:landscape){.cm-support-bank[style*="--slot-count:5"] .cm-bank-slots{display:grid;inset:24px 12% 8px;grid-template-columns:1fr;grid-template-rows:repeat(5,minmax(0,1fr))}.cm-support-bank[style*="--slot-count:5"] .cm-support-slot{position:relative;inset:auto;width:100%;height:100%}}
+/* A click turns a ready shrine card over to prepare an order. No cooldown or
+   turn is spent until the animal completes its move/attack. */
+.cm-mist-caption{position:fixed;z-index:21;pointer-events:none;width:240px;max-width:calc(100vw - 16px);padding:7px 9px;border:1px solid #7b8c7e;border-radius:4px;background:#122b29eb;color:#eee5cd;font:11px/1.4 system-ui,sans-serif}
+.cm-mist-caption[data-valid="true"]{border-color:#bcd899;color:#eff5d2}
+.cm-mist-source{filter:brightness(1.18)!important}
+body.checkmate-mode .cm-support-slot .cm-order-armed .tcg-card__frame{visibility:hidden}
+body.checkmate-mode .cm-support-slot .cm-order-armed .tcg-card__back{display:flex}
+body.checkmate-mode .cm-support-slot .cm-order-armed .tcg-card__cooldown-number{visibility:hidden}
+body.checkmate-mode .cm-support-slot .cm-order-armed .tcg-card__back::after{content:'↟';position:absolute;top:20%;color:#f1d887;font:900 28px/1 ui-monospace,monospace}
+body.checkmate-mode .cm-support-slot .cm-order-armed .tcg-card__cooldown-label{font-size:0}
+body.checkmate-mode .cm-support-slot .cm-order-armed .tcg-card__cooldown-label::after{content:'ORDER';font-size:7px}
+/* Returning the original reading card home must not tween its positioning
+   transform while the pointer is already aiming an effect. */
+body.checkmate-mode.cm-dragging .cm-card.tcg-card{transition:none!important}
+/* Holder positioning wins over the generic hand-card hover transform. */
+body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support:is(:hover,:focus-visible){transform:translate(-50%,-50%)}
+/* A prepared order makes friendly habitats directly grabbable from the first
+   touch; no selection tap is required to establish touch-action. */
+.cm-game[data-ordering="true"] .cm-squares button{touch-action:none}
+.cm-game[data-ordering="true"] .cm-squares button[data-order-unit="true"]{cursor:grab}
+body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support .tcg-card__topline{display:none}
+/* At holder scale, use an inset pixel corner marker instead of a large coin. */
+body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support .tcg-card__topline{display:none}
+/* Extra air above the horizontal stand keeps raised names below its label. */
+@media(max-aspect-ratio:6/5) and (min-height:721px){
+ .cm-altar-art{top:14px}
+ .cm-bank-slots{bottom:41px}
+}
+.cm-shrine-medallion{bottom:-29px;background:radial-gradient(circle at 40% 30%,#455044,#202b29 72%);border-color:#98733e;box-shadow:inset 0 0 0 1px #15201e,0 1px 0 #d2ac65,0 2px 0 #101b18}
+.cm-shrine-medallion::before{inset:2px;border-color:#74613d;box-shadow:none}
+.cm-shrine-leaf,.cm-shrine-count{inset:0;margin:auto;width:14px;height:14px}
+.cm-shrine-count{width:10px;color:#ffe2a0}
+.cm-shrine-medallion[data-state="exhausted"]{filter:none}
+.cm-shrine-sparks{opacity:0;background:none;inset:7px;box-shadow:-7px -3px var(--shrine-leaf),7px -5px var(--shrine-leaf),-5px 7px var(--shrine-leaf),7px 5px var(--shrine-leaf);border-radius:0}
+@keyframes cm-leaf-scatter{from{opacity:1;clip-path:inset(0);transform:scale(1)}to{opacity:0;clip-path:polygon(0 0,40% 0,40% 35%,100% 35%,100% 60%,60% 60%,60% 100%,0 100%);transform:scale(1.3)}}
+@keyframes cm-leaf-form{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+@keyframes cm-leaf-sparks{0%,100%{opacity:0;transform:scale(.5)}45%{opacity:1;transform:scale(1.2)}}
+.cm-medallion-changed .cm-shrine-sparks{animation:cm-leaf-sparks 280ms steps(4,end)}
+.cm-medallion-changed[data-state="exhausted"] .cm-shrine-leaf{display:block;animation:cm-leaf-scatter 130ms steps(4,end) forwards}
+.cm-medallion-changed[data-state="exhausted"] .cm-shrine-count{animation:cm-leaf-form 140ms 130ms steps(4,end) both}
+.cm-medallion-changed[data-state="ready"][data-previous="exhausted"] .cm-shrine-count{display:block;animation:cm-leaf-scatter 130ms steps(4,end) forwards}
+.cm-medallion-changed[data-state="ready"] .cm-shrine-leaf{animation:cm-leaf-form 140ms 130ms steps(4,end) both}
+@media(max-height:480px) and (orientation:landscape){.cm-shrine-medallion{bottom:-22px}.cm-shrine-leaf{width:12px;height:12px}.cm-shrine-count{width:8px;height:11px}}
+@media(prefers-reduced-motion:reduce){.cm-medallion-changed :is(.cm-shrine-leaf,.cm-shrine-count,.cm-shrine-sparks){animation:none!important}.cm-medallion-changed[data-state="exhausted"] .cm-shrine-leaf,.cm-medallion-changed[data-state="ready"] .cm-shrine-count{display:none}}
+/* Vertical holders reserve a visible base between cards, including all three
+   counters. Narrow landscape puts the socket beside each card's foot. */
+@media(min-width:900px) and (min-aspect-ratio:6/5){
+ .cm-game{--table-wing:176px}
+ .cm-support-bank{--support-card-height:min(112px,calc((var(--table-board) - 14px) * .265 - 27px))}
+ body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support{height:var(--support-card-height)}
+ body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support .tcg-card__art{height:calc(var(--support-card-height) - 52px)}
+ .cm-shrine-medallion{bottom:-25px}
+}
+@media(max-height:480px) and (orientation:landscape){.cm-shrine-medallion{left:calc(50% + 29px);bottom:-5px}}
+
+/* At shrine scale the face is a nameplate and a single illustration window.
+   Fill the available height instead of leaving an empty nested panel below it. */
+body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support .tcg-card__frame::before,
+body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support .tcg-card__frame::after{display:none}
+body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support .tcg-card__frame{box-shadow:inset 0 0 0 1px #ffffff66}
+body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support .tcg-card__title{flex:none;min-height:18px}
+body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support .tcg-card__art{flex:1;min-height:0;height:auto;margin:0;border-width:1px;border-radius:0;box-shadow:none}
+@media(min-width:900px) and (min-aspect-ratio:6/5){body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support .tcg-card__title{min-height:22px}}
+@media(max-height:480px) and (orientation:landscape){body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support .tcg-card__title{min-height:12px}}
+/* Short authored lessons use the same woodland materials as the game table. */
+.cm-encounter-list{display:flex;flex-direction:column;gap:8px;margin:14px 0}
+body.checkmate-mode .cm-encounter-option{display:flex;align-items:center;gap:12px;width:100%;min-height:72px;padding:9px 12px;border:2px solid #6d6747;border-radius:2px;background:#1b302b;color:#efe3c7;text-align:left;box-shadow:inset 0 0 0 2px #10231e}
+body.checkmate-mode .cm-encounter-option[aria-pressed="true"]{border-color:#d4b46c;background:#344333;box-shadow:inset 0 0 0 2px #152d26}
+.cm-encounter-option i{display:block;flex:none;width:48px;height:48px;background-image:var(--encounter-art);background-size:400% 1000%;background-position:0 0;background-repeat:no-repeat;image-rendering:pixelated}
+.cm-encounter-option span{display:grid;gap:5px}.cm-encounter-option b{font:700 18px/22px Georgia,serif;color:#f0d69f}.cm-encounter-option small{font:12px/17px system-ui,sans-serif;color:#e0d9c6}
+#cm-encounter-intro{font-size:14px;line-height:1.5}#cm-encounter-tools{font-size:12px;line-height:1.5;color:#e6cf9d}
+#cm-encounter-brief summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:#eed49b}#cm-encounter-hint{color:#e4d5b3}
+.cm-squares button.cm-encounter-goal{background:#e5c67822;box-shadow:inset 0 0 0 2px #f4d184}
+.cm-squares button.cm-encounter-goal::after{content:'✦';position:absolute;right:7%;bottom:4%;font:700 13px/1 ui-monospace,monospace;color:#ffe6a0;text-shadow:1px 1px #20342a;pointer-events:none}
+@media(max-width:500px){body.checkmate-mode .cm-encounter-option{gap:9px;padding:8px;min-height:68px}.cm-encounter-option b{font-size:16px;line-height:20px}.cm-encounter-option i{width:40px;height:40px}}
+
+.cm-tower-fire{position:fixed;z-index:12;left:50%;bottom:20px;transform:translateX(-50%);max-width:calc(100vw - 24px);padding:12px 18px;background:#283b3a;color:#ffe1a0;border:2px solid #b18b48;box-shadow:3px 3px #07171e;font:700 13px/1.3 ui-monospace,monospace;cursor:pointer}
+.cm-tower-fire:focus-visible{outline:3px solid #b6edee;outline-offset:4px}
+.cm-perch-note{background:#20362f;color:#f0deb1;padding:8px;font:12px/1.4 ui-monospace,monospace;margin:0}

@@ -1,0 +1,15 @@
+# Checkmate artwork provenance and prompt set
+
+Generated with the built-in image-generation tool using the existing `public/assets/board.webp` as style reference only. No Pets were changed. Runtime assets are copied into the project; generated source PNGs remain here. Effects are extracted as connected alpha components (48 threshold, 3px dilation); the detached venom droplet is grouped with its dart. This avoids row bleed in the generated sheet. Terrain uses equal source cells. Both fit within 172×172 using nearest-neighbor and center in 192×192 transparent cells. WebP is lossless with exact transparent RGB preservation.
+
+Shared prompt: production Woodland Chess Project Checkmate sprite art matching the reference's rich dimensional handcrafted pixel art, walnut, antique brass, ivory, teal and moss. Crisp visible pixel clusters, detailed material shading, warm highlights, dark outlines. No smooth vector icons, text, labels, grid lines or card frames.
+
+Effects prompt: exactly four columns and three rows of isolated centered square cells, transparent background, 15% margins. Row 1: leaf-crested cloth banner; sturdy iron shield; clay smoke pot with grey smoke; wooden bowl of glowing spring water. Row 2: aimed arrow and bow; green tangle vines; circular bramble snare; tied purifying herbs. Row 3: purple venom-tipped dart; fallen mossy log; wooden weapon cache with sword; armor cache with breastplate. Consistent three-quarter view. Do not draw the reference chessboard.
+
+Terrain prompt: exactly four columns and two rows, transparent, low-profile projected shallow top-down ground plane, no square base plate. Row 1: low grey smoke; short mossy log; thorn snare with empty center; gold protective ring with shield sparks. Row 2: turquoise healing light pool and leaf motes; purple poison puff/droplets; orange ember burst; green root tendrils around empty center. Fit each within 80% of a cell and keep square colors/animals readable.
+
+Card-back prompt: single portrait 2:3 game card back in the same detailed pixel style, weathered walnut, antique brass frame, modest ivy, centered embossed leaf and chess-crown crest, deep teal recessed panel, ivory highlights, no text or letters. Finished opaque card with rounded corners. Generated exterior is opaque; used as a contained card image, not an alpha cutout.
+
+Files: `effects-source.png`, `terrain-source.png`, `card-back-source.png` are generated originals; `*-packed.png` are deterministic packed/downscaled exports. Corresponding game WebPs live in `public/assets/checkmate/`.
+
+2026-10-30 courtyard update: original generated PNGs retained at ../courtyard-stone-v1.png (2×1 grey paving atlas), ../habitat-squares-v1.png (3×2 ground atlas: turtle/raven/hare, lion/fox/rat), and ../courtyard-structures-v2.png (transparent frontal wall/tower sheet). Runtime lossless WebPs live in public/assets/checkmate; paving512×256, habitats768×512, isolated wall512×344, tower512×410. Animal atlases were not regenerated. Terrain alpha feather is applied at runtime to cached tiles; source pixels remain intact. Prior scenery assets retained for recovery.

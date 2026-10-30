@@ -1,0 +1,25 @@
+{
+  "name": "woodland-chess",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "vitest run",
+    "deploy": "npm run build && wrangler deploy",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "chess.js": "1.4.0",
+    "js-chess-engine": "2.4.6"
+  },
+  "devDependencies": {
+    "vite": "^7.3.1",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4",
+    "@playwright/test": "^1.56.1",
+    "wrangler": "^4.45.0"
+  }
+}

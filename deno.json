@@ -1,0 +1,1 @@
+{"nodeModulesDir":"auto","tasks":{"dev":"deno run -A npm:vite --host 0.0.0.0","build":"deno run -A npm:typescript/tsc --noEmit && deno run -A npm:vite build","preview":"deno run -A npm:vite preview --host 0.0.0.0","test":"deno run -A npm:vitest run"}}

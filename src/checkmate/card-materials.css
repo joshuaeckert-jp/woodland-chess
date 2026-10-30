@@ -1,0 +1,131 @@
+/*
+ * Card materials are deliberately structural rather than a second colour system.
+ * The printed face stays quiet enough to read at hand and shrine scale; texture
+ * lives in the frame and behind the illustration, never over the card copy.
+ */
+body.checkmate-mode .cm-card.tcg-card[data-card-material]{
+ --tcg-frame-image:none;
+ --material-rim:7px;
+ --tcg-art-pattern:none;
+ --tcg-paper-grain:linear-gradient(135deg,#ffffff22 0 18%,transparent 18% 72%,#102a3512 72%);
+}
+
+body.checkmate-mode .cm-card.tcg-card[data-card-material="terrain"]{
+ --tcg-frame-image:url('/assets/checkmate/frames/terrain.webp');
+ --tcg-paper:#e8ddc7;
+ --tcg-edge:#705440;
+ --tcg-accent:#a5764b;
+ --tcg-art:#67503e;
+ --tcg-art-pattern:linear-gradient(90deg,#0000 49%,#241c1638 50% 52%,#0000 53%) 0 0/22px 12px,linear-gradient(#d1b18a2a 0 42%,#2f241c3d 43% 54%,#0000 55%) 0 0/22px 12px;
+ --tcg-paper-grain:repeating-linear-gradient(0deg,#7a5b4310 0 1px,transparent 1px 12px),repeating-linear-gradient(90deg,#7a5b4310 0 1px,transparent 1px 22px);
+}
+body.checkmate-mode .cm-card.tcg-card[data-card-material="defense"]{
+ --tcg-frame-image:url('/assets/checkmate/frames/defense.webp');
+ --tcg-paper:#e5edf1;
+ --tcg-edge:#365d79;
+ --tcg-accent:#6a9dbd;
+ --tcg-art:#486e8b;
+ --tcg-art-pattern:radial-gradient(circle at 10% 14%,#d6e6e7 0 1px,#20485d 2px 3px,transparent 4px),radial-gradient(circle at 90% 86%,#d6e6e7 0 1px,#20485d 2px 3px,transparent 4px),repeating-linear-gradient(135deg,#ffffff0d 0 2px,#102c3b19 2px 4px);
+ --tcg-paper-grain:linear-gradient(90deg,#fff9 0 2%,#1a47530d 2% 4%,transparent 4% 96%,#1a47530d 96% 98%,#fff9 98%);
+}
+body.checkmate-mode .cm-card.tcg-card[data-card-material="buff"]{
+ --tcg-frame-image:url('/assets/checkmate/frames/buff.webp');
+ --tcg-paper:#eee4cc;
+ --tcg-edge:#745534;
+ --tcg-accent:#b28a4e;
+ --tcg-art:#765638;
+ --tcg-art-pattern:repeating-linear-gradient(90deg,#e2bb6d22 0 2px,#38251724 2px 5px),linear-gradient(135deg,#fff3 0 24%,transparent 24% 76%,#1e110f20 76%);
+ --tcg-paper-grain:repeating-linear-gradient(90deg,#5d3b1c0b 0 1px,transparent 1px 5px),linear-gradient(130deg,#fff7,#b7814110);
+}
+body.checkmate-mode .cm-card.tcg-card[data-card-material="control"]{
+ --tcg-frame-image:url('/assets/checkmate/frames/control.webp');
+ --tcg-paper:#eee8ed;
+ --tcg-edge:#5f496b;
+ --tcg-accent:#9371a4;
+ --tcg-art:#60446d;
+ --tcg-art-pattern:radial-gradient(ellipse at 0 100%,transparent 0 30%,#35243d55 31% 35%,transparent 36% 50%),radial-gradient(ellipse at 100% 0,transparent 0 30%,#35243d55 31% 35%,transparent 36% 50%),repeating-linear-gradient(135deg,#25193012 0 3px,transparent 3px 8px);
+ --tcg-paper-grain:linear-gradient(45deg,transparent 0 45%,#5f436d12 46% 50%,transparent 51%) 0 0/10px 10px;
+}
+body.checkmate-mode .cm-card.tcg-card[data-card-material="recovery"]{
+ --tcg-frame-image:url('/assets/checkmate/frames/recovery.webp');
+ --tcg-paper:#e5eed8;
+ --tcg-edge:#3c6d45;
+ --tcg-accent:#73a467;
+ --tcg-art:#4d7f52;
+ --tcg-art-pattern:radial-gradient(ellipse at 8% 82%,#c1e08a55 0 8%,transparent 9%),radial-gradient(ellipse at 92% 18%,#c1e08a55 0 8%,transparent 9%),repeating-linear-gradient(45deg,#f7ffd30e 0 2px,#173f2519 2px 5px);
+ --tcg-paper-grain:repeating-linear-gradient(45deg,#3772400a 0 1px,transparent 1px 6px),linear-gradient(120deg,#fff9,#91ba7216);
+}
+body.checkmate-mode .cm-card.tcg-unit-card[data-card-material="animal"]{
+ --tcg-frame-image:url('/assets/checkmate/frames/animal.webp');
+ --tcg-paper:#eadfc8;
+ --tcg-edge:#60472f;
+ --tcg-accent:#9b7443;
+ --tcg-art:#4c5b3d;
+ --tcg-art-pattern:radial-gradient(ellipse at 10% 90%,#9fbd5d55 0 10%,transparent 11%),radial-gradient(ellipse at 90% 10%,#d7b15b40 0 8%,transparent 9%),repeating-linear-gradient(125deg,#1f43251a 0 2px,transparent 2px 7px);
+ --tcg-paper-grain:repeating-linear-gradient(90deg,#6849290a 0 1px,transparent 1px 7px),linear-gradient(140deg,#fff9,#af805d15);
+}
+
+body.checkmate-mode .cm-card.tcg-card[data-card-material] .tcg-card__frame{
+ background:var(--tcg-paper-grain),linear-gradient(145deg,#fff9 0%,transparent 24%);
+ background-color:var(--tcg-paper);
+ border-image-source:var(--tcg-frame-image);
+ /* Source frames have a broad illustrated rim; percentage slices preserve it at all card sizes. */
+ border-image-slice:22%;
+ border-image-width:var(--material-rim);
+ border-image-repeat:stretch;
+}
+body.checkmate-mode .cm-card.tcg-card[data-card-material] .tcg-card__art{
+ position:relative;
+ isolation:isolate;
+ background:var(--tcg-art-pattern);
+ background-color:var(--tcg-art);
+}
+body.checkmate-mode .cm-card.tcg-card[data-card-material] .tcg-card__illustration{position:relative;z-index:1}
+
+/* The only continuously living card treatment: smoke stays inside its art window. */
+body.checkmate-mode .cm-card.tcg-card[data-card-effect="smoke"] .tcg-card__art::after{
+ content:'';
+ position:absolute;
+ z-index:2;
+ inset:8% -4% -8%;
+ pointer-events:none;
+ opacity:.7;
+ background:radial-gradient(ellipse at 19% 84%,#e9efe58c 0 9%,transparent 19%),radial-gradient(ellipse at 60% 63%,#c9d8cf8a 0 11%,transparent 24%),radial-gradient(ellipse at 82% 87%,#eff5e68a 0 8%,transparent 18%);
+ background-size:66% 84%,58% 72%,54% 66%;
+ background-repeat:no-repeat;
+ animation:tcg-card-smoke 4.8s steps(12,end) infinite;
+}
+@keyframes tcg-card-smoke{0%,100%{background-position:5% 108%,54% 98%,100% 112%;opacity:.42}48%{background-position:13% 32%,45% 12%,87% 44%;opacity:.76}}
+
+/* Motion has to yield to play: no ambient movement while a card is in flight or a dialog owns focus. */
+@media(prefers-reduced-motion:reduce){body.checkmate-mode .cm-card.tcg-card[data-card-effect="smoke"] .tcg-card__art::after{animation:none;opacity:.35}}
+body[data-ambient="off"] .cm-card.tcg-card[data-card-effect="smoke"] .tcg-card__art::after,
+body[data-game-busy="true"] .cm-card.tcg-card[data-card-effect="smoke"] .tcg-card__art::after,
+body.cm-dragging .cm-card.tcg-card[data-card-effect="smoke"] .tcg-card__art::after,
+body:has(dialog[open]) .cm-card.tcg-card[data-card-effect="smoke"] .tcg-card__art::after{animation:none;opacity:.32}
+
+@media(max-width:720px){
+ body.checkmate-mode .cm-card.tcg-card[data-card-material]{--material-rim:5px}
+ body.checkmate-mode .cm-card.tcg-card[data-card-effect="smoke"] .tcg-card__art::after{opacity:.5;background-size:58% 76%,52% 65%,48% 60%}
+}
+
+/* Shrine cards are intentionally compact; reader cards can reveal the full sculpted rim. */
+body.checkmate-mode .cm-card.tcg-card.tcg-card--support[data-card-material]{--material-rim:4px}
+body.checkmate-mode .cm-card.tcg-card.tcg-card--preview[data-card-material]{--material-rim:12px}
+/* The reader lifts the original hand/support card, so its material rim scales here too. */
+body.checkmate-mode #cm-card-view .cm-card.tcg-card[data-card-material]{--material-rim:20px}
+body.checkmate-mode #cm-card-view .cm-card.tcg-card[data-card-material] .tcg-card__frame{padding:16px}
+body.checkmate-mode #cm-unit-hover .tcg-card.tcg-unit-card[data-card-material]{--material-rim:12px}
+body.checkmate-mode #cm-unit-hover .tcg-card.tcg-unit-card[data-card-material] .tcg-card__frame{padding:12px}
+/* Material artwork is the single outer frame; retire the earlier blue card shell. */
+body.checkmate-mode .cm-card.tcg-card[data-card-material],
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted[data-card-material]{padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;clip-path:none}
+body.checkmate-mode .cm-card.tcg-card[data-card-material]::before{content:none}
+body.checkmate-mode .cm-card.tcg-card[data-card-material] .tcg-card__frame{border-color:transparent;border-radius:0;box-shadow:none;clip-path:none}
+body.checkmate-mode .cm-card.tcg-card[data-card-material] .tcg-card__frame::before,
+body.checkmate-mode .cm-card.tcg-card[data-card-material] .tcg-card__frame::after{content:none}
+body.checkmate-mode .cm-card.tcg-card[data-card-material]:focus-visible{outline:2px dashed #f4d58b;outline-offset:3px}
+
+/* Paper is inset behind the illustrated rim, never painted into its transparent outer corners. */
+body.checkmate-mode .cm-card.tcg-card[data-card-material] .tcg-card__frame{background:none}
+body.checkmate-mode .cm-card.tcg-card[data-card-material]::before{content:'';position:absolute;inset:calc(var(--material-rim) * .55);z-index:-1;border-radius:0;background:var(--tcg-paper-grain),linear-gradient(145deg,#fff9 0%,transparent 24%);background-color:var(--tcg-paper);pointer-events:none}

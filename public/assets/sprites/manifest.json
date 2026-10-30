@@ -1,0 +1,85 @@
+{
+  "cell": 192,
+  "columns": 4,
+  "framesPerTeam": 20,
+  "animals": {
+    "lion": {
+      "frames": 40,
+      "size": [
+        768,
+        1920
+      ],
+      "cell": 192,
+      "baseline": 168,
+      "source": "exec-cf9de6b8-62f2-4180-a9de-5d1f878a9621.png"
+    },
+    "fox": {
+      "frames": 40,
+      "size": [
+        768,
+        1920
+      ],
+      "cell": 192,
+      "baseline": 168,
+      "source": "exec-8d86a06c-9d48-4991-97ad-eb9994deacf8.png"
+    },
+    "raven": {
+      "frames": 40,
+      "size": [
+        768,
+        1920
+      ],
+      "cell": 192,
+      "baseline": 168,
+      "source": "exec-ed68bf4d-51e9-4772-aca4-6675c7e05851.png"
+    },
+    "hare": {
+      "frames": 40,
+      "size": [
+        768,
+        1920
+      ],
+      "cell": 192,
+      "baseline": 168,
+      "source": "exec-ce935c7d-e0a4-4975-af52-61102acf7701.png"
+    },
+    "turtle": {
+      "frames": 40,
+      "size": [
+        768,
+        1920
+      ],
+      "cell": 192,
+      "baseline": 168,
+      "source": "exec-84744302-6a68-4d66-a91e-37951ee1477c.png"
+    },
+    "rat": {
+      "frames": 40,
+      "size": [
+        768,
+        1920
+      ],
+      "cell": 192,
+      "baseline": 168,
+      "source": "exec-67973f2b-6e21-40c8-86eb-fe7ac5c5ead7.png"
+    }
+  },
+  "habitats": {
+    "cell": 192,
+    "columns": 4,
+    "order": [
+      "light-lion",
+      "light-fox",
+      "light-raven",
+      "light-hare",
+      "light-turtle",
+      "light-rat",
+      "dark-lion",
+      "dark-fox",
+      "dark-raven",
+      "dark-hare",
+      "dark-turtle",
+      "dark-rat"
+    ]
+  }
+}

@@ -1,0 +1,111 @@
+import { expect, test, type Page } from '@playwright/test'
+
+const state = (page: Page) => page.evaluate(() => (window as any).checkmate.state)
+
+async function boot(page: Page) {
+  await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await page.goto('/?mode=checkmate&new=1')
+  await page.locator('#cm-loading').waitFor({ state: 'hidden' })
+  await page.selectOption('#cm-match-kind', 'skirmish')
+  await page.selectOption('#cm-play-mode', 'local')
+  await page.locator('#cm-seed').fill('1')
+  await page.locator('#cm-start-deployment').click()
+  if (await page.locator('#cm-auto-deploy').isVisible()) await page.locator('#cm-auto-deploy').click()
+}
+
+async function install(page: Page) {
+  const card = page.locator('#cm-hand [data-card-id],#cm-card-view [data-card-id]').first()
+  await card.press('Space')
+  await expect(page.locator('#cm-preview')).toBeVisible()
+  await page.locator('#cm-confirm').click()
+  await expect(page.locator('.cm-effect-card-flight')).toBeVisible()
+  await expect(page.locator('.cm-effect-card-flight')).toHaveCount(0, { timeout: 1600 })
+  await expect.poll(()=>page.evaluate(()=>(window as any).checkmate.busy)).toBe(false)
+}
+
+test('effect cards use a floating reader and settle into pixel altars', async ({ page }) => {
+  await boot(page)
+  await expect(page.locator('.cm-altar-art:visible')).toHaveCount(2)
+  await expect(page.locator('.cm-support-bank').first()).toHaveCSS('border-top-width', '0px')
+  await install(page)
+  await expect(page.locator('[data-support-side="w"] [data-card-id]')).toHaveCount(1)
+  await install(page)
+  await page.locator('[data-support-side="w"] [data-card-id]').first().press('Enter')
+  await expect(page.locator('#cm-card-reader')).toBeVisible()
+  await expect(page.locator('#cm-card-reader button.primary')).toHaveCount(0)
+})
+
+test('an effect burns from its altar and keeps the target on the table', async ({ page }) => {
+  await boot(page)
+  await install(page)
+  await install(page)
+  const support=page.locator('#cm-support [data-card-id]').first();await support.press('E')
+  await page.locator('[data-square="e1"]').click()
+  await expect(page.locator('#cm-preview')).toBeVisible()
+  await expect(page.locator('#cm-preview')).not.toHaveAttribute('open')
+  await page.locator('#cm-confirm').click()
+  await expect(page.locator('.cm-effect-card-flight')).toBeVisible()
+  await expect.poll(async () => (await state(page)).players.w.discard.length).toBe(1)
+  await expect(page.locator('.cm-effect-card-flight')).toHaveCount(0, { timeout: 1800 })
+})
+
+test('resizing during an installation settles one committed card into its altar', async ({ page }) => {
+  await boot(page)
+  const card = page.locator('#cm-hand [data-card-id]').first()
+  await card.press(' ');await page.locator('#cm-confirm').click()
+  await expect(page.locator('.cm-effect-card-flight')).toBeVisible()
+  await page.setViewportSize({ width: 1050, height: 760 })
+  await expect(page.locator('.cm-effect-card-flight')).toHaveCount(0, { timeout: 1500 })
+  await expect(page.locator('.cm-card-arriving')).toHaveCount(0)
+  await expect(page.locator('[data-support-side="w"] [data-card-id]')).toHaveCount(1)
+  const game = await state(page)
+  expect(game.log.filter((action: any) => action.type === 'install')).toHaveLength(1)
+})
+
+test('one automatic order exhausts its source card after the piece resolves', async ({ page }) => {
+  await boot(page)
+  await install(page)
+  await install(page)
+  const source = page.locator('[data-support-side="w"] [data-card-id]').first()
+  await source.press(' ')
+  await page.locator('[data-square="e2"]').click()
+  const from=await page.locator('[data-square="e2"]').boundingBox(),to=await page.locator('[data-square="e4"]').boundingBox();if(!from||!to)throw new Error('Missing move squares');await page.mouse.move(from.x+from.width/2,from.y+from.height/2);await page.mouse.down();await page.mouse.move(to.x+to.width/2,to.y+to.height/2,{steps:12});await page.mouse.up()
+  await expect(page.locator('.cm-effect-card-flight')).toBeVisible()
+  await expect(page.locator('.cm-effect-card-flight')).toHaveCount(0, { timeout: 2000 })
+  await expect(page.locator('[data-support-side="w"] [data-card-id]')).toHaveCount(1)
+  await expect(page.locator('[data-support-side="w"] .tcg-exhausted')).toHaveCount(1)
+  const game = await state(page)
+  expect(game.log.filter((action: any) => action.type === 'order')).toHaveLength(1)
+})
+
+test('hover previews without a modal, clicking pins actions, and Escape returns to the board', async ({ page }) => {
+  await boot(page)
+  const card = page.locator('#cm-hand [data-card-id]').first()
+  await card.hover({ position: { x: 14, y: 50 } })
+  await expect(page.locator('#cm-card-reader')).toBeVisible()
+  await expect(page.locator('dialog#cm-card-reader')).toHaveCount(0)
+  await card.press(' ')
+  await expect(page.locator('#cm-preview')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(page.locator('#cm-card-reader')).toBeHidden()
+})
+
+test('touch opens a capped readable inline card and Escape returns to the board', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 390, height: 667 }, isMobile: true, hasTouch: true })
+  const page = await context.newPage()
+  await boot(page)
+  const card = page.locator('#cm-hand [data-card-id]').first()
+  const box = (await card.boundingBox())!
+  await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 3)
+  await expect(page.locator('#cm-card-reader')).toBeVisible()
+  await expect(page.locator('#cm-card-view .tcg-card--preview')).toBeVisible()
+  const bounds = await page.locator('#cm-card-reader').boundingBox()
+  expect(bounds!.x).toBeGreaterThanOrEqual(0)
+  expect(bounds!.y).toBeGreaterThanOrEqual(0)
+  expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(390)
+  expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(667)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390)
+  await page.keyboard.press('Escape')
+  await expect(page.locator('#cm-card-reader')).toBeHidden()
+  await context.close()
+})

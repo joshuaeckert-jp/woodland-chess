@@ -1,0 +1,8 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "woodland-chess",
+  "compatibility_date": "2026-10-26",
+  "assets": {
+    "directory": "./dist"
+  }
+}

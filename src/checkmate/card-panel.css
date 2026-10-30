@@ -1,0 +1,116 @@
+/* Card inspection lives on the table; it never takes the board's focus away. */
+body.checkmate-mode #cm-card-reader{position:fixed;z-index:15;width:min(280px,calc(100vw - 16px));max-height:calc(100dvh - 76px);overflow:auto;overscroll-behavior:contain;padding:8px;background:#182e2d;border:0;border-radius:0;box-shadow:3px 0 #40564a,-3px 0 #40564a,0 3px #40564a,0 -3px #40564a;display:block}
+body.checkmate-mode #cm-card-reader[hidden],body.checkmate-mode #cm-preview[hidden]{display:none}
+body.checkmate-mode #cm-card-reader .tcg-card--preview{width:100%;max-width:none;min-height:0;max-height:none;overflow:visible;margin:0;box-shadow:none}
+body.checkmate-mode #cm-card-reader .cm-card-choices p{font:11px/1.4 ui-monospace,monospace;margin:8px 0;color:#dfdbc7}
+body.checkmate-mode #cm-card-reader .cm-card-choices button{min-height:38px;margin:3px 0!important;font:700 12px/1.25 ui-monospace,monospace;border-radius:0}
+body.checkmate-mode #cm-card-reader .cm-card-choices small{font-size:10px;line-height:1.4}
+.cm-inline-confirm{position:fixed;z-index:12;left:50%;top:60px;transform:translateX(-50%);width:min(510px,calc(100vw - 24px));padding:12px;background:#1b3230;color:#f0dec0;box-shadow:3px 0 #8b805e,-3px 0 #8b805e,0 3px #8b805e,0 -3px #8b805e}
+.cm-inline-confirm h2{font:700 13px ui-monospace,monospace;margin:0 0 6px}.cm-inline-confirm p{font:12px/1.45 ui-monospace,monospace;margin:0 0 8px}.cm-inline-confirm button{min-height:40px;margin-right:8px;border-radius:0}
+body.checkmate-mode .cm-effect-card-flight .tcg-card{width:100%;height:100%;min-height:0;max-width:none;margin:0;transform:none;pointer-events:none}
+.cm-card-arriving{visibility:hidden!important}
+@media(max-width:720px){body.checkmate-mode #cm-card-reader{width:min(264px,calc(100vw - 16px));padding:6px}body.checkmate-mode #cm-card-reader .cm-card-choices button{min-height:44px}.cm-inline-confirm{top:54px;padding:10px}.cm-inline-confirm p{font-size:11px}}
+@media(max-height:480px){body.checkmate-mode #cm-card-reader{max-height:calc(100dvh - 68px)}.cm-inline-confirm{top:52px}}
+@media(prefers-reduced-motion:reduce){.cm-effect-card-flight{display:none}}
+/* Preserve the printed card's proportions while it flies; never reflow it into a socket. */
+body.checkmate-mode :is(.cm-effect-card-flight,.cm-deployment-card) .cm-card.tcg-card.tcg-card--hand{width:128px;height:185px;min-height:0;max-width:none;margin:0;transform:scale(var(--flight-card-scale,1));transform-origin:top left;pointer-events:none}
+body.checkmate-mode :is(.cm-effect-card-flight,.cm-deployment-card) .cm-card.tcg-card.tcg-card--hand .tcg-card__frame{height:100%;min-height:0;padding:5px;gap:3px}
+body.checkmate-mode :is(.cm-effect-card-flight,.cm-deployment-card) .cm-card.tcg-card.tcg-card--hand .tcg-card__art{height:71px}
+body.checkmate-mode :is(.cm-effect-card-flight,.cm-deployment-card) .cm-card.tcg-card.tcg-card--hand .tcg-card__title{font-size:10px;line-height:11px}
+body.checkmate-mode :is(.cm-effect-card-flight,.cm-deployment-card) .cm-card.tcg-card.tcg-card--hand .tcg-card__effect{font-size:7px;line-height:8px}
+body.checkmate-mode .cm-support-bank.cm-drop-active{border:0;background:transparent;box-shadow:none}
+.cm-support-bank.cm-drop-active .cm-altar-art{filter:brightness(1.35)}
+.cm-support-bank.cm-drop-active .cm-support-slot::after{background:#557465}
+/* Ownership must be readable before someone tries to use a card. The plaque sits
+   above the illustrated ledge, so it never steals square or card space. */
+body.checkmate-mode .cm-support-bank header{position:absolute;z-index:4;left:50%;top:0;width:max-content;max-width:calc(100% - 10px);height:auto;margin:0;padding:2px 6px 3px;overflow:visible;clip-path:none;transform:translateX(-50%);white-space:nowrap;border:1px solid #627663;background:#16302d;color:#f3e4bd;box-shadow:2px 2px 0 #071817;font:700 9px/12px ui-monospace,monospace;text-align:center;pointer-events:none}
+body.checkmate-mode .cm-support-bank header b{display:block;color:#fff0c9;font-weight:800;letter-spacing:.01em}
+body.checkmate-mode .cm-support-bank header b i{display:inline-block;width:6px;height:6px;margin:0 4px 1px 0;background:#95cde0;box-shadow:1px 1px 0 #12221d;vertical-align:middle}
+body.checkmate-mode .cm-support-bank header span{display:block;color:#cad6c7;font-size:7px;line-height:9px;overflow:visible;max-width:none}
+body.checkmate-mode .cm-support-bank[data-owner="own"] header,body.checkmate-mode .cm-support-bank[data-owner="ivory"] header{border-color:#c49b4d;background:#2e2b20}
+body.checkmate-mode .cm-support-bank[data-owner="own"] header b i,body.checkmate-mode .cm-support-bank[data-owner="ivory"] header b i{background:#f1c85e}
+body.checkmate-mode .cm-support-bank[data-owner="opponent"] header,body.checkmate-mode .cm-support-bank[data-owner="charcoal"] header{border-color:#7b729a;background:#252432}
+body.checkmate-mode .cm-support-bank[data-owner="opponent"] header b i,body.checkmate-mode .cm-support-bank[data-owner="charcoal"] header b i{background:#b99ae8}
+body.checkmate-mode .cm-support-bank[data-active="true"] header{box-shadow:0 0 0 1px #f7dc86,2px 2px 0 #071817;color:#fff7d2}
+body.checkmate-mode .cm-support-bank[data-active="true"] header b::after{content:' · TURN';color:#ffdc76;font-size:7px;letter-spacing:.08em}
+@media(min-width:600px) and (min-height:481px) and (min-aspect-ratio:6/5){body.checkmate-mode .cm-support-bank header{top:0;font-size:8px;line-height:11px;padding:2px 4px}body.checkmate-mode .cm-support-bank header span{font-size:6px;line-height:8px}}
+@media(max-height:480px) and (orientation:landscape){body.checkmate-mode .cm-support-bank header{font-size:6px;line-height:8px;padding:1px 3px}body.checkmate-mode .cm-support-bank header span{display:none}body.checkmate-mode .cm-support-bank header b i{width:4px;height:4px;margin-right:2px}}
+.cm-drop-choice{position:fixed;z-index:14;width:min(280px,calc(100vw - 20px));max-height:42dvh;overflow:auto;padding:10px;background:#1b3230;color:#f0dec0;box-shadow:3px 0 #8b805e,-3px 0 #8b805e,0 3px #8b805e,0 -3px #8b805e}
+.cm-drop-choice[hidden]{display:none}.cm-drop-choice p{font:12px/1.45 ui-monospace,monospace;margin:0 0 8px}.cm-drop-choice>div{display:flex;flex-wrap:wrap;gap:6px}.cm-drop-choice button{min-height:44px;border-radius:0;font:700 12px/1.25 ui-monospace,monospace;margin:0!important;flex:1;white-space:normal}.cm-drop-choice #cm-drop-cancel{width:100%;min-height:32px;margin-top:6px!important}
+body.checkmate-mode #cm-card-reader{pointer-events:auto;isolation:isolate}
+/* The reading stage holds the original card node and its attached controls. */
+body.checkmate-mode #cm-card-reader{width:min(280px,calc(100vw - 16px));padding:0;background:transparent;box-shadow:none;overflow:visible;max-height:calc(100dvh - 66px)}
+body.checkmate-mode #cm-card-view{position:relative}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted{position:relative;left:auto;top:auto;display:block;width:100%;height:auto;min-height:340px;max-height:none;margin:0;transform:none;overflow:visible;filter:none;cursor:grab;touch-action:none;box-shadow:3px 3px 0 #081312}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__frame{height:auto;min-height:340px;padding:10px;gap:7px}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__frame>*{flex-shrink:0}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__title{font-size:14px;line-height:18px;white-space:normal;overflow:visible}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__art{height:132px}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__effect{display:block;overflow:visible;font-size:12px;line-height:16px;-webkit-line-clamp:unset}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__category{font-size:9px;line-height:12px;white-space:normal}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__footer{font-size:8px;line-height:11px}
+body.checkmate-mode #cm-card-reader .cm-card-choices{padding:6px 8px;background:#1b3230;box-shadow:3px 3px 0 #081312;max-height:calc(100dvh - 420px);min-height:0;overflow:auto}
+body.checkmate-mode #cm-card-reader .cm-card-choices p{font-size:10px;line-height:1.35;margin:2px 0 5px}
+body.checkmate-mode #cm-card-reader .cm-card-choices button{min-height:38px}
+body.checkmate-mode #cm-card-reader #cm-card-actions:empty{display:none}
+/* The lifted original gets the full readable face without reintroducing actions. */
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted{border-radius:6px;box-shadow:0 3px 0 #10243a,5px 8px 0 #08131f}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__frame{padding:12px;border-radius:4px}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__title{padding-right:32px;color:var(--tcg-ink);font-family:Georgia,'Times New Roman',serif;font-size:18px;line-height:22px;letter-spacing:-.025em}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__art{height:148px;border-radius:4px}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__effect{color:#182e43;font-family:Georgia,'Times New Roman',serif;font-size:14px;line-height:19px}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__category{color:var(--tcg-edge);font-size:9px;letter-spacing:.1em;line-height:12px}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__seal{transform:scale(1.15);transform-origin:bottom right}
+
+/* The reader is the card; its support copy stays available to assistive tech. */
+body.checkmate-mode #cm-card-reader .cm-card-choices{position:static;min-height:0!important;max-height:none!important;padding:0;background:transparent;box-shadow:none;overflow:visible}
+body.checkmate-mode #cm-card-reader .cm-card-choices p#cm-card-context{position:absolute;width:1px;height:1px;margin:-1px!important;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+body.checkmate-mode #cm-card-reader #cm-card-actions{display:none}
+@media(max-height:600px){body.checkmate-mode #cm-card-reader{display:block;grid-template-columns:none;width:min(280px,calc(100vw - 16px));background:transparent;overflow:visible}body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__art{height:148px}}
+.cm-card-home--support{pointer-events:none}
+.cm-order-source{touch-action:none!important;cursor:grab!important}
+.cm-habitat-drag-source{cursor:grabbing!important}.cm-habitat-drag-hint[data-valid="true"]{color:#e7d08f!important}.cm-habitat-drag-hint[data-valid="false"]{color:#e4c8b1!important}
+@media(max-width:720px){body.checkmate-mode #cm-card-reader{width:min(248px,calc(100vw - 16px))}body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted{min-height:324px}body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__frame{min-height:324px}body.checkmate-mode #cm-card-reader .cm-card.tcg-card .tcg-card__art{height:118px}}
+
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__topline{top:48px;right:10px}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__seal{width:36px;height:36px;font-size:22px;transform:none}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-unit-card.cm-card-lifted .tcg-card__topline{position:static;top:auto;right:auto}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-unit-card.cm-card-lifted .tcg-card__seal{width:auto;height:20px;font-size:9px}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__topline{top:4px;right:6px}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__title{padding-right:42px}
+
+@media(max-height:600px){body.checkmate-mode #cm-card-reader{display:block;grid-template-columns:none;width:min(280px,calc(100vw - 16px));background:transparent;overflow:visible}body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted{min-height:0;max-height:calc(100dvh - 70px);overflow:auto}body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__frame{min-height:0}body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__art{height:96px}body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__title{font-size:16px;line-height:20px}body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__effect{font-size:12px;line-height:16px}}
+
+/* A delayed, pointer-transparent unit card keeps the habitat directly usable. */
+body.checkmate-mode #cm-unit-hover{position:fixed;z-index:14;width:min(224px,calc(100vw - 16px));pointer-events:none;filter:drop-shadow(3px 4px 0 #07141bc9)}
+body.checkmate-mode #cm-unit-hover .tcg-unit-card{width:100%;height:auto;min-height:0;max-height:none;margin:0;overflow:visible;padding:3px;transform:none}
+body.checkmate-mode #cm-unit-hover .tcg-card__frame{min-height:0;height:auto;padding:8px;gap:6px}
+body.checkmate-mode #cm-unit-hover .tcg-card__title{font-size:15px;line-height:18px;white-space:normal;overflow:visible}
+body.checkmate-mode #cm-unit-hover .tcg-card__topline{order:0;position:static;min-height:14px}
+body.checkmate-mode #cm-unit-hover .tcg-card__seal{width:auto;height:auto;font-size:9px}
+body.checkmate-mode #cm-unit-hover .tcg-unit-card__stats{order:1;display:flex;flex-wrap:wrap;justify-content:space-between;font:700 11px/20px ui-monospace,monospace;color:var(--tcg-ink)}
+body.checkmate-mode #cm-unit-hover .tcg-unit-card__stats b:first-child{font-size:15px}
+body.checkmate-mode #cm-unit-hover .tcg-card__art{order:2;height:104px;flex:none}
+body.checkmate-mode #cm-unit-hover .tcg-card__category{order:3;font-size:9px;line-height:12px;white-space:normal}
+body.checkmate-mode #cm-unit-hover .tcg-card__effect{order:4;font-size:11px;line-height:15px;display:block;overflow:visible}
+@media(max-height:500px){body.checkmate-mode #cm-unit-hover{width:200px}body.checkmate-mode #cm-unit-hover .tcg-card__art{height:64px}body.checkmate-mode #cm-unit-hover .tcg-card__effect{font-size:10px;line-height:13px}}
+body.checkmate-mode #cm-unit-hover .tcg-unit-card__art .tcg-card__illustration{inset:0;margin:auto;width:100px;height:100px;max-width:100%;max-height:100%}
+@media(max-height:500px){body.checkmate-mode #cm-unit-hover .tcg-unit-card__art .tcg-card__illustration{width:60px;height:60px}}
+.tcg-unit-card__conditions{display:flex;flex-wrap:wrap;gap:4px;color:var(--tcg-ink);font:700 10px/16px ui-monospace,monospace}
+.tcg-unit-card__conditions b{padding:1px 5px;background:var(--tcg-art);border:1px solid var(--tcg-edge)}
+#cm-unit-hover .tcg-unit-card__conditions{order:1}
+.cm-pending-install{display:block;color:#f5dd96;text-align:center;font:700 9px/13px ui-monospace,monospace;text-shadow:1px 1px #112b29;pointer-events:none}
+.cm-support-slot:has(.cm-pending-install){box-shadow:inset 0 0 0 2px #e7ce7c88;background:#d7c17419}
+/* Ownership plaques stay above card names, with readable type at every scale. */
+body.checkmate-mode .cm-support-bank header{top:-6px;transform:translate(-50%,-100%);max-width:none;font-size:11px;line-height:14px;padding:4px 7px}
+body.checkmate-mode .cm-support-bank header span{font-size:9px;line-height:12px}
+body.checkmate-mode .cm-support-bank[data-active="true"] header b::after{font-size:8px}
+@media(max-width:599px){body.checkmate-mode .cm-support-bank header{top:-2px;font-size:10px;line-height:13px;padding:3px 6px}body.checkmate-mode .cm-support-bank header span{font-size:8px;line-height:10px}}
+@media(max-height:480px) and (orientation:landscape){body.checkmate-mode .cm-support-bank header{top:-2px;font-size:9px;line-height:12px;padding:2px 4px}body.checkmate-mode .cm-support-bank header span{display:none}}
+@media(min-width:600px) and (min-height:481px) and (min-aspect-ratio:6/5){body.checkmate-mode .cm-support-bank header{top:18px}}
+
+.cm-field-explanation{padding:12px 14px;background:#1b302c;color:#f2e5c8;border:2px solid #938356;box-shadow:inset 0 0 0 2px #10261f}
+.cm-field-explanation+.cm-field-explanation{border-top:0}
+.cm-field-explanation h3{margin:0 0 7px;color:#f4d58b;font:700 13px/1.35 ui-monospace,monospace}
+.cm-field-explanation p{margin:0;font:12px/1.5 system-ui,sans-serif;text-wrap:pretty}
+body.checkmate-mode #cm-unit-hover{max-height:calc(100dvh - 64px);overflow:auto}

@@ -1,0 +1,55 @@
+import {expect,test,type Page} from '@playwright/test'
+async function boot(page:Page,reduced=false){
+ await page.emulateMedia({reducedMotion:reduced?'reduce':'no-preference'})
+ await page.goto('/?mode=checkmate&encounter=tower&new=1')
+ await page.locator('#cm-loading').waitFor({state:'hidden'})
+ await page.locator('[data-encounter-id="tower"]').click()
+ await page.locator('#cm-start-deployment').click()
+}
+const pixels=(page:Page,overlay=false)=>page.evaluate(overlay=>{const canvas=document.querySelector<HTMLCanvasElement>(overlay?'.cm-board-wrap canvas:not(#cm-board)':'#cm-board')!;const text=canvas.toDataURL();let hash=2166136261;for(let i=0;i<text.length;i++)hash=Math.imul(hash^text.charCodeAt(i),16777619);return hash>>>0},overlay)
+const mist=(page:Page)=>page.locator('[data-support-side="w"] [data-card-effect="smoke"] .tcg-card__art').evaluate(node=>getComputedStyle(node,'::after').animationName)
+
+test('physical frame assets load and an enlarged original card reveals its material without changing rules',async({page})=>{
+ await boot(page,true)
+ for(const material of ['terrain','defense','buff','control','recovery','animal']){const response=await page.request.get(`/assets/checkmate/frames/${material}.webp`);expect(response.ok()).toBe(true)}
+ const card=page.locator('[data-support-side="w"] [data-card-effect="clear"]')
+ await expect(card).toHaveAttribute('data-card-material','terrain')
+ await card.hover()
+ await expect(page.locator('#cm-card-reader')).toBeVisible()
+ expect(await page.locator('#cm-card-view .tcg-card__art').evaluate(node=>getComputedStyle(node).backgroundImage)).toContain('linear-gradient')
+ const frame=page.locator('#cm-card-view .tcg-card__frame')
+ await expect(frame).toHaveCSS('border-image-slice','22%')
+ expect(await frame.evaluate(node=>getComputedStyle(node).borderImageSource)).toContain('terrain.webp')
+ await expect(page.locator('#cm-card-view')).toContainText('permanently demolishes')
+ expect(await page.evaluate(()=>(window as any).checkmate.state.log.length)).toBe(0)
+})
+
+test('board idles and smoke animate without touching game state, and motion setting freezes both',async({page})=>{
+ await boot(page)
+ const before=await pixels(page)
+ await expect.poll(()=>pixels(page),{timeout:2000}).not.toBe(before)
+ expect(await mist(page)).toBe('tcg-card-smoke')
+ await page.evaluate(()=>(window as any).checkmate.dispatch({type:'burn',player:'w',cardId:'w-enc-support-2',sourceUnitId:'w-unit-8',targetSquare:'d4'}))
+ const saved=await page.evaluate(()=>JSON.stringify((window as any).checkmate.state))
+ const smoke=await pixels(page,true)
+ await expect.poll(()=>pixels(page,true),{timeout:2000}).not.toBe(smoke)
+ expect(await page.evaluate(()=>JSON.stringify((window as any).checkmate.state))).toBe(saved)
+ await page.locator('#cm-menu-button').click()
+ await page.locator('#cm-motion').uncheck()
+ await expect(page.locator('body')).toHaveAttribute('data-ambient','off')
+ const frozen=await pixels(page),stillSmoke=await pixels(page,true)
+ await page.waitForTimeout(350)
+ expect(await pixels(page)).toBe(frozen);expect(await pixels(page,true)).toBe(stillSmoke)
+})
+
+test('reduced motion renders a steady board and a static smoke-card illustration',async({page})=>{
+ await boot(page,true)
+ expect(await mist(page)).toBe('none')
+ const before=await pixels(page)
+ await page.waitForTimeout(350)
+ expect(await pixels(page)).toBe(before)
+ await page.emulateMedia({reducedMotion:'no-preference'})
+ await expect(page.locator('body')).toHaveAttribute('data-ambient','on')
+ const resumed=await pixels(page)
+ await expect.poll(()=>pixels(page),{timeout:2000}).not.toBe(resumed)
+})

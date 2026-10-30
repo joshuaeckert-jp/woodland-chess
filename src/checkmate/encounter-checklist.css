@@ -1,0 +1,29 @@
+/* A small quest note, separate from the board's interactive surface. */
+.cm-objectives{position:fixed;z-index:6;top:8px;left:50%;transform:translateX(-50%);width:min(330px,calc(100vw - 76px));padding:5px 8px;border:1px solid #8e764a;background:#263128;color:#eee5cd;box-shadow:2px 2px 0 #071b20;font:11px/15px system-ui,sans-serif}
+.cm-objectives[hidden]{display:none}
+.cm-objectives summary{display:flex;align-items:center;gap:6px;min-height:20px;cursor:pointer;list-style:none;font-weight:700;color:#f4db9c}
+.cm-objectives summary::-webkit-details-marker{display:none}
+.cm-goal-title{display:none;flex:1;min-width:0}
+.cm-goal-next{flex:1;min-width:0}
+.cm-objectives[open] .cm-goal-title{display:block}
+.cm-objectives[open] .cm-goal-next{display:none}
+.cm-goal-count{padding:0 4px;border:1px solid #61704c;color:#dcebc5;background:#1a2922;font:700 10px/15px ui-monospace,monospace;white-space:nowrap}
+.cm-goal-arrow{font-size:12px;transform:rotate(-90deg)}
+.cm-objectives[open] .cm-goal-arrow{transform:none}
+.cm-objectives ol{list-style:none;margin:3px 0 4px;padding:0}
+.cm-objectives li{display:flex;gap:6px;align-items:flex-start;min-height:16px;color:#bdc4b2}
+.cm-objectives li i{flex:none;width:12px;height:12px;margin-top:1px;border:1px solid #687858;background:#17261f;text-align:center;font:700 10px/11px system-ui,sans-serif;font-style:normal;color:#ead18a}
+.cm-objectives li[data-active=true]{color:#fff0cc}
+.cm-objectives li[data-active=true] i{border-color:#d0b375}
+.cm-objectives li[data-done=true]{color:#adcc98}
+.cm-objectives li[data-done=true] i{background:#405c36;color:#d5f1be;border-color:#97b77e}
+.cm-objectives footer{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid #556047;padding-top:3px;font-size:10px;line-height:15px;color:#cfceb4}
+.cm-objectives footer button{padding:0 2px;border:0;background:transparent;color:#f0d28a;font:700 10px/15px system-ui,sans-serif;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.cm-objectives summary:focus-visible,.cm-objectives button:focus-visible{outline:2px solid #dbe7b1;outline-offset:3px}
+.cm-objectives[data-result=failed]{border-color:#af7659}
+.cm-objectives[data-result=complete]{border-color:#b9c98b}
+.cm-game[data-encounter=true] .cm-ribbon{position:absolute;width:1px;height:1px;min-height:0;margin:-1px;padding:0;border:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.cm-game[data-goal-space=reserved]{--table-hud:120px}
+@media(min-width:1100px) and (min-height:760px){.cm-objectives{left:16px;transform:none;width:270px}}
+@media(max-width:500px){.cm-objectives{left:8px;right:56px;width:auto;transform:none}}
+@media(max-height:480px) and (orientation:landscape){.cm-objectives{top:4px;padding:3px 7px;font-size:10px}.cm-objectives summary{min-height:22px}}
