@@ -20,6 +20,9 @@ import type { DeploymentOrigin } from './deployment-card'
 import { CheckmateOpponent } from './ai-client'
 import { DEFAULT_PLAY,restoreSession,serializeSession } from './session'
 import type { PlaySettings } from './session'
+import { placeInspection,inInspectionCorridor } from './inspection-placement'
+import './table-stack.css'
+import './card-inspection.css'
 
 type Intent={kind:'fire';cardId:string;unitId:string}|{kind:'install';cardId:string;unitId?:string}|{kind:'deploy';unitId:string}|{kind:'order';cardId:string;order:'move'|'attack'|'auto';unitId?:string}|{kind:'burn';cardId:string;sourceId?:string}
 const SAVE='project-checkmate-save-v1'
@@ -40,13 +43,14 @@ let suppressPeekFocus=false,dismissedPeekId=''
 let dismissedPeekRect:DeploymentOrigin|undefined
 let unitHoverTimer:ReturnType<typeof setTimeout>|undefined,unitHoverId='',unitHoverPressed=false,unitHoverSquare:HTMLElement|null=null
 let peekPinned=false,peekId='',peekTimer:ReturnType<typeof setTimeout>|undefined
+let peekPlacementSide:'left'|'right'|undefined
 let selectedEncounter:EncounterId='blockade'
 let goalUserOpen:boolean|null=null,goalEncounterId='' 
 const encounter=()=>game.options.encounterId?ENCOUNTERS[game.options.encounterId]:null
 const capture=()=>game.options.combatRules==='capture'
 const cardDefinitions=()=>getCardDefinitions(game.options.combatRules)
 const animalName=(u:Unit)=>capture()?captureUnitName(u):UNIT_DEFINITIONS[u.definitionId].name
-const unitCard=(u:Unit,options:Parameters<typeof renderUnitCard>[2]={})=>renderUnitCard(u,effectiveStats(game,u.id),{...options,combatRules:game.options.combatRules})+(u.square?fieldExplanation(u.square):'')
+const unitCard=(u:Unit,options:Parameters<typeof renderUnitCard>[2]={})=>renderUnitCard(u,effectiveStats(game,u.id),{...options,ownerLabel:play.mode==='ai'?(u.side===play.human?'Your animal':'Opponent’s animal'):sideName(u.side),combatRules:game.options.combatRules})+(u.square?fieldExplanation(u.square):'')
 const reinforcement=()=>game.options.armyMode==='reinforcement'
 const reserves=(side:Side)=>reinforcement()?game.units.filter(u=>u.side===side&&!u.square&&u.hp>0&&u.role!=='k'):[]
 const unit=(id:string)=>game.units.find(u=>u.id===id)
@@ -212,7 +216,7 @@ function bank(side:Side){
 function renderTableCards(){
  const previousMedallions=new Map([...document.querySelectorAll<HTMLElement>('.cm-shrine-medallion')].map(node=>[node.dataset.medallionCard,node.dataset.state]))
  const exhausted=new Set([...document.querySelectorAll<HTMLElement>('.cm-support-slot .tcg-exhausted')].map(card=>card.dataset.cardId))
- const near:Side=flipped?'b':'w',far:Side=near==='w'?'b':'w',side=panelSide(),hand=game.players[side].hand,animals=reserves(side),showUnits=reinforcement()&&(encounter()?animals.length>0:handTab==='units')
+ const near:Side=panelSide(),far:Side=near==='w'?'b':'w',side=panelSide(),hand=game.players[side].hand,animals=reserves(side),showUnits=reinforcement()&&(encounter()?animals.length>0:handTab==='units')
  $('cm-far-bank').innerHTML=bank(far);$('cm-near-bank').innerHTML=bank(near)
  if(!matchMedia('(prefers-reduced-motion:reduce)').matches&&$<HTMLInputElement>('cm-motion').checked)for(const card of document.querySelectorAll<HTMLElement>('.cm-support-slot .tcg-state-ready'))if(exhausted.has(card.dataset.cardId)){const art=card.querySelector('.tcg-card__illustration');art?.animate([{filter:'brightness(.65)'},{filter:'brightness(1)'}],{duration:200,easing:'ease-out'})}
  for(const card of document.querySelectorAll<HTMLElement>('.cm-support-slot [data-card-id]')){const armed=(intent?.kind==='order'||intent?.kind==='install')&&intent.cardId===card.dataset.cardId;card.classList.toggle('cm-order-armed',armed);card.setAttribute('aria-pressed',String(armed))}
@@ -297,6 +301,7 @@ function queueHoverCard(card:HTMLElement){
 }
 function cardRect(element:HTMLElement):DeploymentOrigin{const r=element.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height}}
 function closeCardPeek(resume=true){
+ peekPlacementSide=undefined
  clearTimeout(peekTimer);peekTimer=undefined;clearTimeout(hoverSwitchTimer);hoverCandidate=null;const wasPinned=peekPinned,id=peekId,hadFocus=$('cm-card-reader')?.contains(document.activeElement)
  peekPinned=false;peekId='';suppressPeekFocus=true;cardLift?.restore();suppressPeekFocus=false;const peek=$('cm-card-reader');if(peek)peek.hidden=true
  const source=id?document.querySelector<HTMLElement>(`#cm-hand [data-card-id="${id}"],.cm-support-slot [data-card-id="${id}"]`):null
@@ -312,13 +317,7 @@ function schedulePeekClose(){
 function inPeekCorridor(x:number,y:number){
  const peek=$('cm-card-reader'),reader=peek.hidden?null:peek.getBoundingClientRect(),home=cardLift?.homeRect
  if(!reader||!home)return false
- const inside=(r:DOMRect,padding=10)=>x>=r.left-padding&&x<=r.right+padding&&y>=r.top-padding&&y<=r.bottom+padding
- if(inside(reader)||inside(home))return true
- // Only the short physical bridge between the card and its stand retains hover.
- // Direction alone must never keep an abandoned reader open indefinitely.
- const top=Math.max(reader.top,home.top),bottom=Math.min(reader.bottom,home.bottom)
- if(top<=bottom&&y>=top-8&&y<=bottom+8)return x>=Math.min(reader.right,home.right)-8&&x<=Math.max(reader.left,home.left)+8
- return false
+ return inInspectionCorridor(x,y,home,reader)
 }
 function showCardPeek(id:string,pinned:boolean){
  hideUnitHover()
@@ -330,19 +329,9 @@ function showCardPeek(id:string,pinned:boolean){
  const hadFocus=source===document.activeElement,newlyLifted=cardLift?.node!==source;suppressPeekFocus=true
  const r=cardLift!.lift(source,definition);if(hadFocus)source.focus({preventScroll:true});suppressPeekFocus=false
  const width=peek.offsetWidth,height=Math.min(peek.offsetHeight,innerHeight-70)
- peek.style.left=`${Math.max(8,Math.min(innerWidth-width-8,r.left+r.width/2-width/2))}px`
- peek.style.top=`${Math.max(54,Math.min(innerHeight-height-10,r.bottom-height))}px`
- if(source.dataset.zone==='support'){
-  const bank=cardLift?.home?.closest<HTMLElement>('.cm-support-bank')
-  const vertical=bank?.querySelector<HTMLElement>('.cm-altar-vertical')
-  if(bank&&vertical&&getComputedStyle(vertical).display!=='none'){
-   const left=r.left+r.width/2<innerWidth/2?r.right+12:r.left-width-12
-   peek.style.left=`${Math.max(8,Math.min(innerWidth-width-8,left))}px`
-  }else if(bank){
-   const b=bank.getBoundingClientRect(),top=b.top+b.height/2<innerHeight/2?b.bottom+10:b.top-height-10
-   peek.style.top=`${Math.max(54,Math.min(innerHeight-height-10,top))}px`
-  }
- }
+ const placement=placeInspection(r,{width,height},{width:innerWidth,height:innerHeight},document.querySelector('.cm-board-wrap')!.getBoundingClientRect(),peekPlacementSide)
+ if(placement.side==='left'||placement.side==='right')peekPlacementSide=placement.side
+ peek.style.left=`${placement.left}px`;peek.style.top=`${placement.top}px`
 
  if(newlyLifted&&!hadFocus)cardLift?.animateFromHome()
  source.setAttribute('aria-controls','cm-card-reader');source.setAttribute('aria-describedby','cm-card-context');source.setAttribute('aria-expanded','true')
@@ -415,9 +404,8 @@ function queueUnitHover(square:HTMLElement|null){
   tooltip.dataset.square=coordinate;tooltip.hidden=false
   square?.setAttribute('aria-describedby','cm-unit-hover')
   const r=square!.getBoundingClientRect(),width=tooltip.offsetWidth,height=tooltip.offsetHeight
-  const left=r.right+12+width<innerWidth?r.right+12:r.left-width-12
-  tooltip.style.left=`${Math.max(8,Math.min(innerWidth-width-8,left))}px`
-  tooltip.style.top=`${Math.max(54,Math.min(innerHeight-height-10,r.top+r.height/2-height/2))}px`
+  const placement=placeInspection(r,{width,height},{width:innerWidth,height:innerHeight},document.querySelector('.cm-board-wrap')!.getBoundingClientRect())
+  tooltip.style.left=`${placement.left}px`;tooltip.style.top=`${placement.top}px`
  },500)
 }
 function inspectUnit(id:string){const u=unit(id);if(!u)return;const d=UNIT_DEFINITIONS[u.definitionId],stats=effectiveStats(game,id);$('cm-unit-title').textContent=`${sideName(u.side)} · ${animalName(u)}`;$('cm-unit-copy').innerHTML=unitCard(u)+`<p>${u.square??'Not deployed'}</p>`+(capture()?`<p>${u.statuses.map(x=>({guarded:'Guard: prevents one capture.',inspired:'Pierce: next capture bypasses Guard.',rooted:'Rooted: cannot move or capture.',poison:''})[x.kind]).filter(Boolean).join(' ')||'No active effects.'}</p>`:`<p>Equipment: ${[u.equipment.weapon?'Weapon +1 ATK':'',u.equipment.armor?'Armor +1 DEF':''].filter(Boolean).join(', ')||'none'}</p><p>Status: ${u.statuses.map(s=>`${s.kind}${s.remaining?` (${s.remaining} ticks)`:s.expiresAtOwnEnd?` (through own turn ${s.expiresAtOwnEnd})`:''}`).join(', ')||'none'}${u.veteran?' · Veteran':''}</p>`);pauseOpponent();$<HTMLDialogElement>('cm-unit-details').showModal()}
@@ -608,6 +596,7 @@ function bind(){
  document.addEventListener('visibilitychange',hideUnitHover)
  window.addEventListener('blur',()=>{unitHoverPressed=false;hideUnitHover()})
  window.addEventListener('resize',hideUnitHover)
+ window.addEventListener('scroll',()=>{hideUnitHover();closeDropChoice();closeCardPeek()},{passive:true})
  window.addEventListener('resize',()=>{layoutHand();closeDropChoice();closeCardPeek()})
  $('cm-card-reader').addEventListener('pointerenter',()=>{clearTimeout(peekTimer);peekTimer=undefined;clearTimeout(hoverSwitchTimer);hoverCandidate=null})
  $('cm-card-reader').addEventListener('pointerdown',()=>{clearTimeout(hoverSwitchTimer);hoverCandidate=null;peekPinned=true})

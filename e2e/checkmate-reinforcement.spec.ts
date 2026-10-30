@@ -58,6 +58,7 @@ test('a reserve animal can be read, then deployed for the only action of the tur
   expect(game.log).toHaveLength(1)
   await page.reload()
   await page.locator('#cm-loading').waitFor({ state: 'hidden' })
+  await page.waitForFunction(() => Boolean((window as any).checkmate))
   expect((await state(page)).units.find((unit: any) => unit.role === 'q' && unit.side === 'w').square).toBe('d2')
 })
 

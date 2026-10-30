@@ -69,10 +69,11 @@ body.checkmate-mode .cm-card.tcg-card[data-card-material] .tcg-card__frame{
  background:var(--tcg-paper-grain),linear-gradient(145deg,#fff9 0%,transparent 24%);
  background-color:var(--tcg-paper);
  border-image-source:var(--tcg-frame-image);
- /* Source frames have a broad illustrated rim; percentage slices preserve it at all card sizes. */
- border-image-slice:22%;
+ /* The supplied 256px frames have a 56px illustrated rim. Keep that source
+    geometry so corners stay square and long edges tile instead of distorting. */
+ border-image-slice:56;
  border-image-width:var(--material-rim);
- border-image-repeat:stretch;
+ border-image-repeat:round;
 }
 body.checkmate-mode .cm-card.tcg-card[data-card-material] .tcg-card__art{
  position:relative;

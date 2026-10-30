@@ -98,15 +98,15 @@ test('the card reader moves the actual hand node once and restores it when close
   expect(await page.locator(`#cm-hand [data-card-id="${id}"]`).evaluate(node => node === (window as any).__cmActualCard)).toBe(true)
 })
 
-test('side shrines flank the centered desktop hand and stack without phone overflow after flip', async ({ browser }) => {
+test('stacked shrines keep the hand below the near altar without phone overflow after flip', async ({ browser }) => {
   const desktop = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' })
   const page = await desktop.newPage()
   await boot(page)
   const [far, board, near, hand] = await Promise.all(['#cm-far-bank', '#cm-board', '#cm-near-bank', '#cm-hand'].map(selector => page.locator(selector).boundingBox()))
   if (!far || !board || !near || !hand) throw new Error('Expected board and altar geometry')
-  expect(far.x).toBeLessThan(board.x)
-  expect(near.x).toBeGreaterThan(board.x + board.width)
-  expect(Math.abs(hand.x + hand.width / 2 - 640)).toBeLessThan(40)
+  expect(far.y + far.height).toBeLessThanOrEqual(board.y + 1)
+  expect(near.y).toBeGreaterThanOrEqual(board.y + board.height - 1)
+  expect(hand.y).toBeGreaterThanOrEqual(near.y + near.height - 1)
   await desktop.close()
 
   const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: 'reduce' })

@@ -1,0 +1,135 @@
+/* Inspection is a larger reading treatment of the original card node, not a
+   second card component. These rules load after the legacy panel variants. */
+body.checkmate-mode .tcg-card__inspection{display:none}
+body.checkmate-mode .tcg-card__owner{display:none}
+body.checkmate-mode .tcg-card__seal:empty{display:none}
+body.checkmate-mode :is(#cm-unit-hover,#cm-card-reader,#cm-unit-details) .tcg-card__seal:empty{display:none!important}
+
+body.checkmate-mode #cm-card-reader{
+ width:min(316px,calc(100vw - 16px));
+ max-height:calc(100dvh - 64px);
+ overflow:auto;
+}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted{
+ width:100%;
+ min-height:0;
+ max-height:none;
+ overflow:visible;
+ border-radius:0;
+ box-shadow:3px 4px 0 #081312;
+}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__frame{
+ min-height:0;
+ padding:16px;
+ gap:7px;
+}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__title{
+ padding-right:0;
+ color:var(--tcg-ink);
+ font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+ font-size:20px;
+ line-height:24px;
+ letter-spacing:-.04em;
+}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__art{height:132px}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__category{
+ font-size:10px;
+ line-height:14px;
+}
+/* The printed effect remains the primary explanation; structured facts follow it. */
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__effect{
+ color:var(--tcg-ink);
+ font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+ font-size:15px;
+ font-weight:700;
+ line-height:21px;
+}
+body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__seal{
+ width:auto;
+ height:auto;
+ padding:2px 5px;
+ font-size:8px;
+ transform:none;
+}
+
+body.checkmate-mode :is(#cm-card-reader .cm-card-lifted,#cm-unit-hover .tcg-unit-card,#cm-unit-details .tcg-unit-card) .tcg-card__inspection{
+ display:grid;
+ gap:4px;
+ margin-top:2px;
+ padding-top:6px;
+ border-top:1px solid color-mix(in srgb,var(--tcg-edge) 55%,transparent);
+ color:var(--tcg-ink);
+ font:700 11px/16px ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+body.checkmate-mode :is(#cm-card-reader .cm-card-lifted,#cm-unit-hover .tcg-unit-card,#cm-unit-details .tcg-unit-card) .tcg-card__inspection-row{
+ display:grid;
+ grid-template-columns:max-content minmax(0,1fr);
+ gap:6px;
+}
+body.checkmate-mode :is(#cm-card-reader .cm-card-lifted,#cm-unit-hover .tcg-unit-card,#cm-unit-details .tcg-unit-card) .tcg-card__inspection-row b{
+ color:var(--tcg-edge);
+ font-weight:900;
+ text-transform:uppercase;
+}
+body.checkmate-mode :is(#cm-card-reader .cm-card-lifted,#cm-unit-hover .tcg-unit-card,#cm-unit-details .tcg-unit-card) :is(.tcg-card__inspection-target,.tcg-card__condition-help){display:block}
+body.checkmate-mode :is(#cm-card-reader .cm-card-lifted,#cm-unit-hover .tcg-unit-card,#cm-unit-details .tcg-unit-card) .tcg-card__owner{
+ display:block;
+ color:var(--tcg-edge);
+ font-size:10px;
+ font-weight:900;
+ letter-spacing:.04em;
+ line-height:14px;
+ text-transform:uppercase;
+}
+
+/* Unit tooltip and dialog use the same information order at different scale. */
+body.checkmate-mode #cm-unit-hover{width:min(292px,calc(100vw - 16px));max-height:calc(100dvh - 56px)}
+body.checkmate-mode :is(#cm-unit-hover .tcg-unit-card,#cm-unit-details .tcg-unit-card){
+ width:100%;
+ height:auto;
+ min-height:0;
+ margin:0;
+ padding:0;
+ overflow:visible;
+ transform:none;
+}
+body.checkmate-mode :is(#cm-unit-hover .tcg-unit-card,#cm-unit-details .tcg-unit-card) .tcg-card__frame{
+ height:auto;
+ min-height:0;
+ padding:13px;
+ gap:7px;
+}
+body.checkmate-mode :is(#cm-unit-hover .tcg-unit-card,#cm-unit-details .tcg-unit-card) .tcg-card__topline{order:1;position:static;min-height:14px}
+body.checkmate-mode :is(#cm-unit-hover .tcg-unit-card,#cm-unit-details .tcg-unit-card) .tcg-card__title{order:2;font-size:20px;line-height:24px;white-space:normal;overflow:visible}
+body.checkmate-mode :is(#cm-unit-hover .tcg-unit-card,#cm-unit-details .tcg-unit-card) .tcg-card__owner{order:3}
+body.checkmate-mode :is(#cm-unit-hover .tcg-unit-card,#cm-unit-details .tcg-unit-card) .tcg-card__art{order:4;height:124px;flex:none}
+body.checkmate-mode :is(#cm-unit-hover .tcg-unit-card,#cm-unit-details .tcg-unit-card) .tcg-unit-card__stats{order:5;display:grid;grid-template-columns:1.45fr 1fr 1fr;font-size:12px;line-height:22px}
+body.checkmate-mode :is(#cm-unit-hover .tcg-unit-card,#cm-unit-details .tcg-unit-card) .tcg-unit-card__stats b:first-child{font-size:13px}
+body.checkmate-mode :is(#cm-unit-hover .tcg-unit-card,#cm-unit-details .tcg-unit-card) .tcg-card__category{order:6;font-size:10px;line-height:14px;white-space:normal}
+body.checkmate-mode :is(#cm-unit-hover .tcg-unit-card,#cm-unit-details .tcg-unit-card) .tcg-card__effect{order:7;display:block;overflow:visible;font-size:15px;line-height:21px}
+body.checkmate-mode :is(#cm-unit-hover .tcg-unit-card,#cm-unit-details .tcg-unit-card) .tcg-unit-card__conditions{order:8;font-size:11px;line-height:17px}
+body.checkmate-mode :is(#cm-unit-hover .tcg-unit-card,#cm-unit-details .tcg-unit-card) .tcg-card__inspection{order:9}
+body.checkmate-mode :is(#cm-unit-hover .tcg-unit-card,#cm-unit-details .tcg-unit-card) .tcg-card__seal{width:auto;height:auto;padding:2px 5px;font-size:8px}
+
+body.checkmate-mode #cm-unit-details{width:min(340px,calc(100vw - 16px));max-height:calc(100dvh - 32px);overflow:auto}
+body.checkmate-mode #cm-unit-details #cm-unit-copy{display:grid;gap:10px}
+body.checkmate-mode #cm-unit-details #cm-unit-copy>p{margin:0;color:#e8dec6;font:13px/19px ui-monospace,SFMono-Regular,Menlo,monospace}
+
+@media(max-width:720px){
+ body.checkmate-mode #cm-card-reader{width:min(290px,calc(100vw - 16px))}
+ body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__frame{padding:13px}
+ body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__art{height:110px}
+ body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__title{font-size:18px;line-height:22px}
+ body.checkmate-mode :is(#cm-unit-hover .tcg-unit-card,#cm-unit-details .tcg-unit-card) .tcg-card__art{height:110px}
+}
+@media(max-height:520px) and (orientation:landscape){
+ body.checkmate-mode #cm-card-reader{max-height:calc(100dvh - 70px)}
+ body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted{max-height:none;overflow:visible}
+ body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__frame{padding:10px;gap:5px}
+ body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__art{height:84px}
+ body.checkmate-mode #cm-card-reader .cm-card.tcg-card.cm-card-lifted .tcg-card__effect{font-size:13px;line-height:18px}
+ body.checkmate-mode #cm-unit-hover .tcg-unit-card .tcg-card__art{height:76px}
+}
+@media(prefers-reduced-motion:reduce){
+ body.checkmate-mode :is(#cm-card-reader .cm-card-lifted,#cm-unit-hover .tcg-unit-card,#cm-unit-details .tcg-unit-card){transition:none}
+}

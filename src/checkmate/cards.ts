@@ -20,6 +20,7 @@ export interface EffectCardOptions {
 }
 
 export interface UnitCardOptions {
+ ownerLabel?:string
  combatRules?:CombatRules
  zone?:'hand'|'preview'
  index?:number
@@ -114,7 +115,14 @@ export function renderEffectCard(card:CardRef,options:EffectCardOptions):string{
   <strong class="tcg-card__title">${escapeHtml(definition.name)}</strong>
   <span class="tcg-card__art" role="img" aria-label="${escapeHtml(definition.name)} woodland illustration"><span class="tcg-card__illustration"></span></span>
   <span class="tcg-card__category">${escapeHtml(definition.category)} order · ${escapeHtml(stateLabel)}</span>
-  <span class="tcg-card__effect">${escapeHtml(definition.description)}</span>
+  <span class="tcg-card__effect">${escapeHtml(options.combatRules==='capture'&&definition.effect==='smoke'?'Animals can enter this square. Smoke blocks captures into or through it by rooks, bishops and queens.':definition.description)}</span>
+  <span class="tcg-card__inspection">
+   <span class="tcg-card__inspection-row"><b>Target</b><span>${escapeHtml(definition.targetHint.replaceAll('cells','squares').replaceAll('friendly source','one of your animals'))}</span></span>
+   <span class="tcg-card__inspection-row"><b>Order</b><span>${options.opponent?'Owner turns it to order an animal.':'Ready on the altar: click to order an animal.'}</span></span>
+   <span class="tcg-card__inspection-row"><b>Cast</b><span>${definition.burnable?(options.opponent?'Owner only · discard after casting.':'Drag from altar to target · discard.'):'Orders only · never discarded.'}</span></span>
+   <span class="tcg-card__inspection-row"><b>Cooldown</b><span>${definition.cooldown} own turn${definition.cooldown===1?'':'s'} after ordering.</span></span>
+   ${definition.effect==='smoke'||definition.effect==='log'?'<span class="tcg-card__inspection-row"><b>Lasts</b><span>Until the owner’s next turn starts.</span></span>':''}
+  </span>
   <span class="tcg-card__footer">Order: exhaust · Effect: ${burnCopy}</span>
  </span>${back}`
  if(options.zone==='preview')return `<article class="${classes.join(' ')}" style="${style}" data-card-definition="${escapeHtml(definition.id)}" data-card-category="${escapeHtml(definition.category)}" data-card-material="${material}" data-card-effect="${escapeHtml(definition.effect)}" aria-label="${escapeHtml(aria)}">${inner}</article>`
@@ -130,7 +138,8 @@ export function renderUnitCard(unit:Unit,stats:EffectiveStats,options:UnitCardOp
  if(!definition)throw new Error(`Unknown unit definition: ${unit.definitionId}`)
  const capture=options.combatRules==='capture'
  const name=capture?captureUnitName(unit):definition.name,description=capture?captureUnitDescription(unit):definition.description
- const conditions=[unit.statuses.some(s=>s.kind==='guarded')?'Guard':'',unit.statuses.some(s=>s.kind==='inspired')?'Pierce':'',unit.statuses.some(s=>s.kind==='rooted')?'Rooted':''].filter(Boolean)
+ const conditions=[unit.statuses.some(s=>s.kind==='guarded')?'Guard':'',unit.statuses.some(s=>s.kind==='inspired')?(capture?'Pierce':'Inspired'):'',unit.statuses.some(s=>s.kind==='rooted')?'Rooted':'',!capture&&unit.statuses.some(s=>s.kind==='poison')?'Poison':''].filter(Boolean)
+ const conditionHelp:Record<string,string>=capture?{Guard:'Guard stops its next capture.',Pierce:'Pierce bypasses Guard on its next capture.',Rooted:'Rooted prevents movement and captures.'}:{Guard:'Defense bonus is active.',Inspired:'Attack bonus is active.',Rooted:'Cannot move; may still attack.',Poison:'Takes poison damage at the end of its turns.'}
  const frame=unit.side==='w'?0:20
  const position={x:'0',y:frame===0?'0':'55.555%'}
  const style=`--species:url('/assets/sprites/${escapeHtml(definition.species)}.webp');--unit-x:${position.x};--unit-y:${position.y};`
@@ -144,12 +153,17 @@ export function renderUnitCard(unit:Unit,stats:EffectiveStats,options:UnitCardOp
  const cardStyle=`${style}--fan-angle:${fanAngle.toFixed(2)}deg;--fan-y:${fanY.toFixed(2)}px;`
  const classes=`cm-card tcg-card tcg-card--${zone} tcg-unit-card${unit.side==='b'?' tcg-card--opponent':''}${options.disabled?' tcg-card--disabled':''}`
  const inner=`<span class="tcg-card__frame">
-  <span class="tcg-card__topline"><span class="tcg-card__badge">${escapeHtml(ROLE_NAMES[unit.role])}</span><span class="tcg-card__seal">${capture?'Capture':escapeHtml(unit.combat)}</span></span>
+  <span class="tcg-card__topline"><span class="tcg-card__badge">${escapeHtml(ROLE_NAMES[unit.role])}</span><span class="tcg-card__seal">${capture?'':escapeHtml(unit.combat)}</span></span>
   <strong class="tcg-card__title">${escapeHtml(name)}</strong>
+  <span class="tcg-card__owner">${escapeHtml(options.ownerLabel??side)}${unit.square?` · ${escapeHtml(unit.square)}`:' · In reserve'}</span>
   <span class="tcg-card__art tcg-unit-card__art" role="img" aria-label="${escapeHtml(side)} ${escapeHtml(definition.species)} illustration"><span class="tcg-card__illustration"></span></span>
   ${capture?`<span class="tcg-unit-card__conditions">${conditions.length?conditions.map(c=>`<b>${c}</b>`).join(''):'<span>Instant capture</span>'}</span>`:`<span class="tcg-unit-card__stats"><b>HP ${stats.hp}/${stats.maxHp}</b><b>ATK ${stats.atk}</b><b>DEF ${stats.def}</b></span>`}
   <span class="tcg-card__category">${capture?'Chess movement':escapeHtml(definition.combat)+' · range '+definition.range} · ${escapeHtml(side)}</span>
   <span class="tcg-card__effect">${escapeHtml(description)}</span>
+  <span class="tcg-card__inspection">
+   <span class="tcg-card__inspection-row"><b>${unit.square?'Order':'Deploy'}</b><span>${unit.square?'Turn an altar card, then drag this habitat.':'Drag to a starting square · uses your turn.'}</span></span>
+   <span class="tcg-card__inspection-row"><b>Effects</b><span>${escapeHtml(conditions.length?conditions.map(c=>conditionHelp[c]??c).join(' '):'No active effects.')}</span></span>
+  </span>
   ${zone==='hand'?'<span class="tcg-card__footer">Deploy · one turn</span>':''}
  </span>`
  if(zone==='preview')return `<article class="${classes}" style="${cardStyle}" data-unit-id="${escapeHtml(unit.id)}" data-card-material="animal" data-species="${escapeHtml(definition.species)}" aria-label="${escapeHtml(aria)}">${inner}</article>`

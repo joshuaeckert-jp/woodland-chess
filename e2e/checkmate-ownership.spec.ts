@@ -15,10 +15,14 @@ test('support shrines name the player and opponent, including after a board flip
  await expect(page.locator('[data-owner="own"] header')).toContainText('Your cards')
  await expect(page.locator('[data-owner="opponent"] header')).toContainText('Opponent’s cards')
  await expect(page.locator('[data-owner="own"]')).toHaveAttribute('aria-label',/Your cards/)
+ await expect(page.locator('#cm-near-bank [data-owner="own"]')).toHaveCount(1)
+ await expect(page.locator('#cm-hand-label')).toContainText('Your hand')
  await page.locator('#cm-menu-button').click()
  await page.locator('#cm-flip').click()
  await expect(page.locator('[data-owner="own"] header')).toContainText('Your cards')
  await expect(page.locator('[data-owner="opponent"] header')).toContainText('Opponent’s cards')
+ await expect(page.locator('#cm-near-bank [data-owner="own"]')).toHaveCount(1)
+ await expect(page.locator('#cm-hand-label')).toContainText('Your hand')
 })
 
 test('local shrines name both sides and keep the active side visible on a phone',async({browser})=>{

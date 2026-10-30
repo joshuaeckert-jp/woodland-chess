@@ -1,0 +1,165 @@
+/* The table reads top-to-bottom at every viewport: rival altar, battlefield,
+   then the local altar and hand. Keep the board as the viewport's priority. */
+body.checkmate-mode{height:auto;min-height:100dvh;overflow-x:hidden;overflow-y:auto}
+
+.cm-game{
+ --table-stack-gap:6px;
+ --table-rail:90px;
+ --table-hand:110px;
+ --table-board:min(calc(100vw - 16px),calc(100dvh - var(--table-hud) - var(--table-hand) - var(--table-rail) - var(--table-rail) - 36px));
+ height:100dvh;
+ min-height:0;
+ grid-template-rows:var(--table-hud) minmax(0,1fr) var(--table-hand);
+ gap:4px;
+ overflow:hidden;
+}
+
+.cm-arena{
+ display:grid;
+ grid-template-columns:minmax(0,1fr);
+ grid-template-rows:var(--table-rail) var(--table-board) var(--table-rail);
+ gap:var(--table-stack-gap);
+ align-content:center;
+ justify-items:center;
+ overflow:visible;
+}
+
+.cm-board-wrap{grid-column:1;grid-row:2}
+#cm-far-bank{grid-column:1;grid-row:1}
+#cm-near-bank{grid-column:1;grid-row:3}
+
+.cm-bank-mount{
+ --table-art-height:min(var(--table-rail),calc(var(--table-rail-width,300px) * .333333));
+ width:min(calc(100vw - 16px),var(--table-rail-width,300px));
+ height:var(--table-rail);
+ align-self:stretch;
+}
+
+/* Only the landscape shrine is used. Its natural 3:1 artwork is never stretched. */
+.cm-altar-vertical{display:none!important}
+.cm-altar-horizontal{display:block!important}
+.cm-altar-art.cm-altar-horizontal{
+ inset:auto auto 0 50%;
+ width:auto;
+ height:var(--table-art-height);
+ max-height:100%;
+ aspect-ratio:3/1;
+ object-fit:contain;
+ object-position:center bottom;
+ transform:translateX(-50%);
+}
+
+/* A bank is one horizontal altar with a predictable three-column socket row. */
+.cm-bank-slots{
+ inset:0 13%;
+ height:auto;
+ display:grid!important;
+ grid-template-columns:repeat(3,minmax(0,1fr));
+ grid-auto-rows:minmax(0,1fr);
+ gap:6px;
+ align-items:center;
+ justify-items:center;
+}
+.cm-support-slot{position:relative!important;inset:auto!important;width:100%!important;height:100%!important}
+body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support{
+ top:auto;
+ bottom:calc(var(--table-art-height) * .385);
+ width:clamp(48px,18vw,64px);
+ height:clamp(62px,calc(var(--table-rail) * .78),78px);
+ transform:translateX(-50%);
+}
+body.checkmate-mode .cm-support-bank[style*="--slot-count:5"] .cm-bank-slots{
+ display:grid!important;
+ inset:0 13%;
+ grid-template-columns:repeat(3,minmax(0,1fr));
+ grid-template-rows:repeat(2,minmax(0,1fr));
+}
+body.checkmate-mode .cm-support-bank[style*="--slot-count:5"] .cm-support-slot{
+ position:relative!important;
+ inset:auto!important;
+ width:100%!important;
+ height:100%!important;
+}
+body.checkmate-mode .cm-support-bank[style*="--slot-count:5"] .cm-support-slot .cm-card.tcg-card.tcg-card--support{
+ top:auto;
+ bottom:calc(var(--table-art-height) * .385);
+ transform:translateX(-50%);
+ transform-origin:center;
+}
+
+/* Preserve the original relic and cooldown medallion treatment at rail scale. */
+.cm-shrine-medallion{left:50%!important;bottom:calc(var(--table-art-height) * .18 - 12px)!important}
+@media(max-width:500px){
+ .cm-shrine-medallion{bottom:calc(var(--table-art-height) * .18 - 12px)!important}
+}
+
+/* The hand is visibly docked beneath the local shrine rather than a detached panel. */
+body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support:is(:hover,:focus-visible){transform:translateX(-50%)}
+.cm-hand-dock{
+ width:min(880px,calc(100% - 8px));
+ height:var(--table-hand);
+ align-self:start;
+ overflow:visible;
+}
+.cm-hand-heading{
+ min-height:22px;
+ padding:0 10px;
+ border-top:1px solid #896b3e;
+ border-bottom:1px solid #4f402b;
+ background:linear-gradient(90deg,transparent,#2b382f 12% 88%,transparent);
+ color:#dbcfb6;
+ text-shadow:0 1px #10231f;
+}
+.cm-hand-heading b{color:#f1d491;letter-spacing:.035em}
+.cm-hand-fan{
+ height:calc(100% - 22px);
+ padding:3px 14px 0;
+ overflow-x:auto;
+ overflow-y:hidden;
+}
+body.checkmate-mode .cm-hand-fan .cm-card.tcg-card.tcg-card--hand,
+.cm-hand-fan .cm-card-home{width:68px;height:84px;flex-basis:68px}
+body.checkmate-mode .cm-hand-fan .cm-card.tcg-card.tcg-card--hand .tcg-card__frame{gap:1px;padding:3px;border-top-width:3px}
+body.checkmate-mode .cm-hand-fan .cm-card.tcg-card.tcg-card--hand .tcg-card__title{min-height:8px;padding-right:15px;font-size:7px;line-height:8px}
+body.checkmate-mode .cm-hand-fan .cm-card.tcg-card.tcg-card--hand .tcg-card__art{height:30px}
+body.checkmate-mode .cm-hand-fan .cm-card.tcg-card.tcg-card--hand .tcg-card__effect{font-size:5px;line-height:6px;-webkit-line-clamp:2}
+body.checkmate-mode .cm-hand-fan .cm-card.tcg-card.tcg-card--hand .tcg-card__seal{transform:scale(.68);transform-origin:top right}
+
+/* Desktop has room for wider altar art and a larger board; it still stacks. */
+@media(min-width:900px) and (min-height:601px){
+ .cm-game{
+  --table-rail:clamp(80px,9dvh,110px);
+  --table-hand:150px;
+  --table-rail-width:clamp(240px,23vw,300px);
+ }
+ body.checkmate-mode .cm-support-slot .cm-card.tcg-card.tcg-card--support{
+  width:64px;
+  height:78px;
+ }
+ body.checkmate-mode .cm-hand-fan .cm-card.tcg-card.tcg-card--hand,
+ .cm-hand-fan .cm-card-home{width:92px;height:122px;flex-basis:92px}
+ body.checkmate-mode .cm-hand-fan .cm-card.tcg-card.tcg-card--hand .tcg-card__frame{gap:2px;padding:4px;border-top-width:4px}
+ body.checkmate-mode .cm-hand-fan .cm-card.tcg-card.tcg-card--hand .tcg-card__title{min-height:10px;padding-right:18px;font-size:9px;line-height:10px}
+ body.checkmate-mode .cm-hand-fan .cm-card.tcg-card.tcg-card--hand .tcg-card__art{height:54px}
+ body.checkmate-mode .cm-hand-fan .cm-card.tcg-card.tcg-card--hand .tcg-card__effect{font-size:6px;line-height:8px;-webkit-line-clamp:3}
+ body.checkmate-mode .cm-hand-fan .cm-card.tcg-card.tcg-card--hand .tcg-card__seal{transform:none}
+}
+@media(min-width:1500px) and (min-height:1000px){
+ .cm-game{--table-rail:110px;--table-hand:150px}
+}
+
+/* Short landscape scrolls vertically instead of compressing the board and its targets. */
+@media(max-height:600px) and (orientation:landscape){
+ body.checkmate-mode{overflow-y:auto}
+ .cm-game{
+  --table-rail:76px;
+  --table-hand:110px;
+  --table-rail-width:260px;
+  --table-board:min(calc(100vw - 16px),max(350px,calc(100dvh - var(--table-hud) - var(--table-hand) - var(--table-rail) - var(--table-rail) - 36px)));
+  height:auto;
+  min-height:calc(var(--table-hud) + var(--table-hand) + var(--table-rail) + var(--table-rail) + var(--table-board) + 36px);
+  overflow:visible;
+ }
+ .cm-arena{align-content:start}
+ .cm-hand-dock{overflow:visible}
+}
